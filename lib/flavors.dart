@@ -1,7 +1,4 @@
-enum Flavor {
-  development,
-  production,
-}
+enum Flavor { development, production }
 
 class FlavorConfig {
   static Flavor? appFlavor;
@@ -26,13 +23,13 @@ class FlavorConfig {
       case Flavor.production:
         return 'https://api.docdoc.com';
       default:
-        return 'https://api.docdoc.com';
+        return '';
     }
   }
 
   static bool get isDevelopment => appFlavor == Flavor.development;
   static bool get isProduction => appFlavor == Flavor.production;
-  
-  static bool get enableDebugFeatures => isDevelopment ;
+
+  static bool get enableDebugFeatures => isDevelopment;
   static bool get enableAnalytics => isProduction;
 }
