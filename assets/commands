@@ -1,3 +1,6 @@
+dart pub run build_runner build
+dart run flutter_native_splash:remove
+dart run flutter_native_splash:create
 flutter run --flavor development -t lib/main_development.dart
 flutter run --flavor production -t lib/main_production.dart
 flutter run --release --flavor development -t lib/main_development.dart
