@@ -1,6 +1,7 @@
+import 'package:docdoc/core/configurations/routing/router.dart';
+import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/configurations/themes/dark_theme.dart';
 import 'package:docdoc/core/configurations/themes/light_theme.dart';
-import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:docdoc/flavors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,8 @@ class DocDocApp extends StatelessWidget {
         themeMode: FlavorConfig.isDevelopment
             ? ThemeMode.light
             : ThemeMode.dark,
-        home: OnboardingScreen(),
+        initialRoute: Routes.onboarding,
+        onGenerateRoute: DocDocRouter.generateRoute,
       ),
     );
   }

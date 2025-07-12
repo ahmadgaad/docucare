@@ -26,6 +26,7 @@ class OnboardingScreen extends StatelessWidget {
                   start: 23.w,
                   end: 23.w,
                   top: 20.h,
+                  bottom: 20.h,
                 ),
                 child: Column(
                   children: [
@@ -34,7 +35,7 @@ class OnboardingScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyles.font13GreyRegular,
                     ),
-                    30.ph,
+                    25.ph,
                     ElevatedButton(
                       onPressed: () {},
                       child: Text(
