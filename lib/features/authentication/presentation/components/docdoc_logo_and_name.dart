@@ -1,7 +1,7 @@
 import 'package:docdoc/core/configurations/themes/styles.dart';
-import 'package:docdoc/core/extensions/gap.dart';
 import 'package:docdoc/shared/utils/svgs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 class DocDocLogoAndName extends StatelessWidget {
@@ -13,7 +13,7 @@ class DocDocLogoAndName extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SvgPicture.asset(Svgs.logo),
-        8.pw,
+        8.horizontalSpace,
         Text('Docdoc', style: TextStyles.font24BlackBold),
       ],
     );

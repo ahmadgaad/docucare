@@ -1,5 +1,6 @@
+import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
-import 'package:docdoc/core/extensions/gap.dart';
+import 'package:docdoc/core/extensions/navigation.dart';
 import 'package:docdoc/features/authentication/presentation/components/docdoc_logo_and_name.dart';
 import 'package:docdoc/features/authentication/presentation/components/doctor_image_and_text.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +18,9 @@ class OnboardingScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              31.ph,
+              31.verticalSpace,
               DocDocLogoAndName(),
-              50.ph,
+              50.verticalSpace,
               DoctorImageAndText(),
               Padding(
                 padding: EdgeInsetsDirectional.only(
@@ -35,9 +36,11 @@ class OnboardingScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyles.font13GreyRegular,
                     ),
-                    25.ph,
+                    25.verticalSpace,
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.pushNamed(Routes.login);
+                      },
                       child: Text(
                         "Get Started",
                         style: TextStyles.font16WhiteSemiBold,

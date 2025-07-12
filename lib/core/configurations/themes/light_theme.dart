@@ -22,5 +22,11 @@ ThemeData lightTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: ColorUtils.primary,
+        // overlayColor: Colors.transparent,
+      ),
+    ),
   );
 }

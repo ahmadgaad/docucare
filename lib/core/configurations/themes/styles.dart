@@ -87,4 +87,10 @@ class TextStyles {
     color: ColorUtils.primary,
     fontWeight: FontWeightHelper.semiBold,
   );
+  
+  static TextStyle font12BlueRegular = TextStyle(
+    fontSize: 12.sp,
+    color: ColorUtils.primary,
+    fontWeight: FontWeightHelper.regular,
+  );
 }
