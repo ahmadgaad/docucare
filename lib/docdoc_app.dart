@@ -17,15 +17,13 @@ class DocDocApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: FlavorConfig.isDevelopment ? true : false,
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
         theme: lightTheme(),
         darkTheme: darkTheme(),
-        themeMode: FlavorConfig.isDevelopment
-            ? ThemeMode.light
-            : ThemeMode.dark,
+        themeMode: ThemeMode.light,
         initialRoute: Routes.onboarding,
         onGenerateRoute: DocDocRouter.generateRoute,
       ),
