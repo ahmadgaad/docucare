@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "608116134696",
+    "project_id": "docucare-17528",
+    "storage_bucket": "docucare-17528.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:608116134696:android:4582f93ae8dbae7a01b61d",
+        "android_client_info": {
+          "package_name": "com.docucare.docdoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb7MUCoMXgqctly23mJit9MWWZp1lZhc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:608116134696:android:18083934a070b57a01b61d",
+        "android_client_info": {
+          "package_name": "com.docucare.docdoc.development"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb7MUCoMXgqctly23mJit9MWWZp1lZhc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

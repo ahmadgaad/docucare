@@ -1,0 +1,22 @@
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "docucare-17528",
+                    "appId": "1:608116134696:android:56acd2f4a61029f601b61d",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "docucare-17528",
+                    "configurations": {
+                        "android": "1:608116134696:android:56acd2f4a61029f601b61d",
+                        "ios": "1:608116134696:ios:fd41adbc1f4bb0d401b61d"
+                    }
+                }
+            }
+        }
+    }
+}
