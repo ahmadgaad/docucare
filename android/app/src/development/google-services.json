@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:608116134696:android:56acd2f4a61029f601b61d",
+        "mobilesdk_app_id": "1:608116134696:android:4582f93ae8dbae7a01b61d",
         "android_client_info": {
-          "package_name": "com.example.docdoc"
+          "package_name": "com.docucare.docdoc"
         }
       },
       "oauth_client": [],
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:608116134696:android:746896d4d40d22d401b61d",
+        "mobilesdk_app_id": "1:608116134696:android:18083934a070b57a01b61d",
         "android_client_info": {
-          "package_name": "com.example.docdoc.development"
+          "package_name": "com.docucare.docdoc.development"
         }
       },
       "oauth_client": [],

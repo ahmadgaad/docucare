@@ -1,0 +1,75 @@
+name: Android Fastlane with Firebase App Distribution Workflow
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Automatic Version Bump Strategy
+  # Major for Breaking Changes (1.0.0 -> 2.0.0)
+  # Minor for New Features (1.0.0 -> 1.1.0)
+  # Patch for Bug Fixes (1.0.0 -> 1.0.1)
+  # Build for CI/CD (1.0.0 -> 1.0.0+1)
+  workflow_dispatch: 
+    inputs:
+      version_bump_strategy:
+        description: 'Version bump strategy'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+        - major
+        - minor
+        - patch
+        - build
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Install flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4.4'
+        bundler-cache: true
+        working-directory: android
+    
+    # This block to determine the version bump strategy
+    # It checks if the workflow is triggered manually or by a push to main/development branches
+    # If manual, it uses the input provided; if pushed to main, it defaults to 'patch'; if pushed to development, it defaults to 'build'.
+    # If pushed to any other branch, it defaults to 'build'.
+    - name: Determine version bump strategy
+      id: version_strategy
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "strategy=${{ github.event.inputs.version_bump_strategy }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "strategy=patch" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/development" ]]; then
+          echo "strategy=build" >> $GITHUB_OUTPUT
+        else
+          echo "strategy=build" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Run Fastlane distribute
+      env:
+        FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_CLI_TOKEN }}
+        VERSION_BUMP_STRATEGY: ${{ steps.version_strategy.outputs.strategy }}
+      run: |
+        bundle exec fastlane android firebase_distribution
+      working-directory: android
