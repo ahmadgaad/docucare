@@ -12,7 +12,7 @@ platform :android do
             android_artifact_type: "APK",
             apk_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
             testers: "softagi.tech@gmail.com",
-            release_notes: "Test Lane"
+            release_notes: "Test Lane with github actions",
         )
   end
 end
