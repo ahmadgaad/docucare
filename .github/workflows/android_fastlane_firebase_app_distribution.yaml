@@ -41,11 +41,12 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+        cache: true
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.4.4'
+        ruby-version: '3.0'
         bundler-cache: true
         working-directory: android
     
