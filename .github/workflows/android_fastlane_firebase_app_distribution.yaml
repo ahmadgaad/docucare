@@ -46,7 +46,17 @@ jobs:
       with:
         ruby-version: '3.4.4'
         bundler-cache: true
-        working-directory: android
+        # working-directory: android
+
+    # ✅ Add Linux platform to avoid platform lock errors from Windows
+    - name: Add Linux platform to Gemfile.lock
+      run: bundle lock --add-platform x86_64-linux
+      working-directory: android
+
+    # ✅ Install gems from android/Gemfile
+    - name: Install Ruby dependencies
+      run: bundle install
+      working-directory: android
     
     # This block to determine the version bump strategy
     # It checks if the workflow is triggered manually or by a push to main/development branches
