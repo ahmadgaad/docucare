@@ -1,4 +1,5 @@
 import 'package:docdoc/core/configurations/routing/routes.dart';
+import 'package:docdoc/easy_move_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/login_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ class DocDocRouter {
     switch (settings.name) {
       case Routes.onboarding:
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
+      case Routes.easyMoveScreen:
+        return MaterialPageRoute(builder: (_) => EasyMoveScreen());
       case Routes.login:
         return PageRouteBuilder(
           pageBuilder: (_, __, ___) => const LoginScreen(),
