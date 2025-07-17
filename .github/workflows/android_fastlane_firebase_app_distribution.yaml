@@ -3,8 +3,6 @@ name: Android Fastlane with Firebase App Distribution Workflow
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   # Automatic Version Bump Strategy
   # Major for Breaking Changes (1.0.0 -> 2.0.0)
   # Minor for New Features (1.0.0 -> 1.1.0)
@@ -46,7 +44,7 @@ jobs:
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.0'
+        ruby-version: '3.4.4'
         bundler-cache: true
         working-directory: android
     
