@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DocDocApp extends StatelessWidget {
-  const DocDocApp({super.key});
+  final String? token;
+  const DocDocApp({super.key, this.token});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class DocDocApp extends StatelessWidget {
         theme: lightTheme(),
         darkTheme: darkTheme(),
         themeMode: ThemeMode.light,
-        initialRoute: Routes.onboarding,
+        initialRoute: token != null ? Routes.home : Routes.login,
         onGenerateRoute: DocDocRouter.generateRoute,
       ),
     );

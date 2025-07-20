@@ -1,0 +1,113 @@
+name: Auto-merge Feature to Development
+
+on:
+  push:
+    branches:
+      - 'features/*'  # Triggers on any branch starting with 'feature/'
+      - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
+      - 'hotfix/*'     # Triggers on any branch starting with 'hotfix/' 
+  
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  auto-merge-and-notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure Git
+      run: |
+        git config --local user.email "softagi.tech@gmail.com"
+        git config --local user.name "ahmadgaad"
+    
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+    
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Merge to development via GitHub API
+      id: merge
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            // Extract branch name from the ref (removes 'refs/heads/')
+            const headBranch = context.ref.replace('refs/heads/', '');
+            console.log('Attempting to merge:', headBranch, '-> development');
+            
+            const result = await github.rest.repos.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'development',
+              head: headBranch,
+              commit_message: `Auto-merge: ${headBranch} into development`
+            });
+            
+            console.log('Merge successful:', result.data.sha);
+            core.setOutput('merge_success', 'true');
+            core.setOutput('merge_sha', result.data.sha);
+          } catch (error) {
+            console.log('Merge failed:', error.message);
+            console.log('Context ref:', context.ref);
+            console.log('Context ref_name:', context.ref_name);
+            core.setOutput('merge_success', 'false');
+            core.setFailed(`Merge failed: ${error.message}`);
+          }
+
+    # - name: Merge to development branch
+    #   id: merge
+    #   run: |
+    #     # Fetch all remote branches
+    #     git fetch --all
+        
+    #     # List available branches for debugging
+    #     echo "Available remote branches:"
+    #     git branch -r
+        
+    #     # Checkout development branch from remote
+    #     git checkout -B development origin/development
+        
+    #     # Merge the feature branch
+    #     echo "Merging ${{ github.ref_name }} into development..."
+    #     if git merge --no-ff origin/${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"; then
+    #       echo "merge_success=true" >> $GITHUB_OUTPUT
+    #       echo "Merge successful, pushing to origin..."
+    #       git push origin development
+    #     else
+    #       echo "merge_success=false" >> $GITHUB_OUTPUT
+    #       echo "Merge failed due to conflicts"
+    #       exit 1
+    #     fi
+    
+    - name: Send email notification
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com 
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "✅ Auto-merge Successful: ${{ github.ref_name }} → development"
+        to: ${{ secrets.TEAM_LEAD_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Hi Team Lead,
+          
+          A new feature branch has been automatically merged to the development branch and requires your code review.
+          
+          Branch Details:
+          - Feature Branch: ${{ github.ref_name }}
+          - Repository: ${{ github.repository }}
+          - Commit: ${{ github.sha }}
+          - Author: ${{ github.actor }}
+          - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          Please review the changes at:
+          ${{ github.server_url }}/${{ github.repository }}/compare/development...${{ github.ref_name }}
+          
+          Best regards,
+          Ahmed Gad

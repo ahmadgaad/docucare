@@ -8,4 +8,8 @@ class AuthStates<T> with _$AuthStates<T> {
   const factory AuthStates.loading() = Loading;
   const factory AuthStates.success(T data) = Success;
   const factory AuthStates.error(String message) = Error;
+  const factory AuthStates.registerLoading() = RegisterLoading;
+  const factory AuthStates.registerSuccess(T data) = RegisterSuccess;
+  const factory AuthStates.registerError({required String error}) =
+      RegisterError;
 }

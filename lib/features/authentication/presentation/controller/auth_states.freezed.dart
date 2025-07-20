@@ -55,14 +55,17 @@ extension AuthStatesPatterns<T> on AuthStates<T> {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial<T> value)?  initial,TResult Function( Loading<T> value)?  loading,TResult Function( Success<T> value)?  success,TResult Function( Error<T> value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial<T> value)?  initial,TResult Function( Loading<T> value)?  loading,TResult Function( Success<T> value)?  success,TResult Function( Error<T> value)?  error,TResult Function( RegisterLoading<T> value)?  registerLoading,TResult Function( RegisterSuccess<T> value)?  registerSuccess,TResult Function( RegisterError<T> value)?  registerError,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case Loading() when loading != null:
 return loading(_that);case Success() when success != null:
 return success(_that);case Error() when error != null:
-return error(_that);case _:
+return error(_that);case RegisterLoading() when registerLoading != null:
+return registerLoading(_that);case RegisterSuccess() when registerSuccess != null:
+return registerSuccess(_that);case RegisterError() when registerError != null:
+return registerError(_that);case _:
   return orElse();
 
 }
@@ -80,14 +83,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial<T> value)  initial,required TResult Function( Loading<T> value)  loading,required TResult Function( Success<T> value)  success,required TResult Function( Error<T> value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial<T> value)  initial,required TResult Function( Loading<T> value)  loading,required TResult Function( Success<T> value)  success,required TResult Function( Error<T> value)  error,required TResult Function( RegisterLoading<T> value)  registerLoading,required TResult Function( RegisterSuccess<T> value)  registerSuccess,required TResult Function( RegisterError<T> value)  registerError,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case Loading():
 return loading(_that);case Success():
 return success(_that);case Error():
-return error(_that);case _:
+return error(_that);case RegisterLoading():
+return registerLoading(_that);case RegisterSuccess():
+return registerSuccess(_that);case RegisterError():
+return registerError(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -104,14 +110,17 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial<T> value)?  initial,TResult? Function( Loading<T> value)?  loading,TResult? Function( Success<T> value)?  success,TResult? Function( Error<T> value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial<T> value)?  initial,TResult? Function( Loading<T> value)?  loading,TResult? Function( Success<T> value)?  success,TResult? Function( Error<T> value)?  error,TResult? Function( RegisterLoading<T> value)?  registerLoading,TResult? Function( RegisterSuccess<T> value)?  registerSuccess,TResult? Function( RegisterError<T> value)?  registerError,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case Loading() when loading != null:
 return loading(_that);case Success() when success != null:
 return success(_that);case Error() when error != null:
-return error(_that);case _:
+return error(_that);case RegisterLoading() when registerLoading != null:
+return registerLoading(_that);case RegisterSuccess() when registerSuccess != null:
+return registerSuccess(_that);case RegisterError() when registerError != null:
+return registerError(_that);case _:
   return null;
 
 }
@@ -128,13 +137,16 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( T data)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( T data)?  success,TResult Function( String message)?  error,TResult Function()?  registerLoading,TResult Function( T data)?  registerSuccess,TResult Function( String error)?  registerError,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case Loading() when loading != null:
 return loading();case Success() when success != null:
 return success(_that.data);case Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case RegisterLoading() when registerLoading != null:
+return registerLoading();case RegisterSuccess() when registerSuccess != null:
+return registerSuccess(_that.data);case RegisterError() when registerError != null:
+return registerError(_that.error);case _:
   return orElse();
 
 }
@@ -152,13 +164,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( T data)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( T data)  success,required TResult Function( String message)  error,required TResult Function()  registerLoading,required TResult Function( T data)  registerSuccess,required TResult Function( String error)  registerError,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case Loading():
 return loading();case Success():
 return success(_that.data);case Error():
-return error(_that.message);case _:
+return error(_that.message);case RegisterLoading():
+return registerLoading();case RegisterSuccess():
+return registerSuccess(_that.data);case RegisterError():
+return registerError(_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +190,16 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( T data)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( T data)?  success,TResult? Function( String message)?  error,TResult? Function()?  registerLoading,TResult? Function( T data)?  registerSuccess,TResult? Function( String error)?  registerError,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case Loading() when loading != null:
 return loading();case Success() when success != null:
 return success(_that.data);case Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case RegisterLoading() when registerLoading != null:
+return registerLoading();case RegisterSuccess() when registerSuccess != null:
+return registerSuccess(_that.data);case RegisterError() when registerError != null:
+return registerError(_that.error);case _:
   return null;
 
 }
@@ -378,6 +396,170 @@ class _$ErrorCopyWithImpl<T,$Res>
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(Error<T>(
 null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RegisterLoading<T> implements AuthStates<T> {
+  const RegisterLoading();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RegisterLoading<T>);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthStates<$T>.registerLoading()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class RegisterSuccess<T> implements AuthStates<T> {
+  const RegisterSuccess(this.data);
+  
+
+ final  T data;
+
+/// Create a copy of AuthStates
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RegisterSuccessCopyWith<T, RegisterSuccess<T>> get copyWith => _$RegisterSuccessCopyWithImpl<T, RegisterSuccess<T>>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RegisterSuccess<T>&&const DeepCollectionEquality().equals(other.data, data));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data));
+
+@override
+String toString() {
+  return 'AuthStates<$T>.registerSuccess(data: $data)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RegisterSuccessCopyWith<T,$Res> implements $AuthStatesCopyWith<T, $Res> {
+  factory $RegisterSuccessCopyWith(RegisterSuccess<T> value, $Res Function(RegisterSuccess<T>) _then) = _$RegisterSuccessCopyWithImpl;
+@useResult
+$Res call({
+ T data
+});
+
+
+
+
+}
+/// @nodoc
+class _$RegisterSuccessCopyWithImpl<T,$Res>
+    implements $RegisterSuccessCopyWith<T, $Res> {
+  _$RegisterSuccessCopyWithImpl(this._self, this._then);
+
+  final RegisterSuccess<T> _self;
+  final $Res Function(RegisterSuccess<T>) _then;
+
+/// Create a copy of AuthStates
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? data = freezed,}) {
+  return _then(RegisterSuccess<T>(
+freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as T,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RegisterError<T> implements AuthStates<T> {
+  const RegisterError({required this.error});
+  
+
+ final  String error;
+
+/// Create a copy of AuthStates
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RegisterErrorCopyWith<T, RegisterError<T>> get copyWith => _$RegisterErrorCopyWithImpl<T, RegisterError<T>>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RegisterError<T>&&(identical(other.error, error) || other.error == error));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,error);
+
+@override
+String toString() {
+  return 'AuthStates<$T>.registerError(error: $error)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RegisterErrorCopyWith<T,$Res> implements $AuthStatesCopyWith<T, $Res> {
+  factory $RegisterErrorCopyWith(RegisterError<T> value, $Res Function(RegisterError<T>) _then) = _$RegisterErrorCopyWithImpl;
+@useResult
+$Res call({
+ String error
+});
+
+
+
+
+}
+/// @nodoc
+class _$RegisterErrorCopyWithImpl<T,$Res>
+    implements $RegisterErrorCopyWith<T, $Res> {
+  _$RegisterErrorCopyWithImpl(this._self, this._then);
+
+  final RegisterError<T> _self;
+  final $Res Function(RegisterError<T>) _then;
+
+/// Create a copy of AuthStates
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? error = null,}) {
+  return _then(RegisterError<T>(
+error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
