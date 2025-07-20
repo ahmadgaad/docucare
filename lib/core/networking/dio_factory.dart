@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:docdoc/core/helpers/shared_pref.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DioFactory {
@@ -15,6 +16,7 @@ class DioFactory {
       dio!
         ..options.connectTimeout = timeOut
         ..options.receiveTimeout = timeOut;
+      _addDioHeaders();
       _addDioInterceptor();
       return dio!;
     } else {
@@ -30,5 +32,16 @@ class DioFactory {
         responseHeader: true,
       ),
     );
+  }
+
+  static void _addDioHeaders() {
+    final prefs = SharedPrefService();
+    String token = prefs.getString('token') ?? '';
+    dio?.options.headers.addAll({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Language': 'en',
+      if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+    });
   }
 }

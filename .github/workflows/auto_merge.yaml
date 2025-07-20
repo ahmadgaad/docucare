@@ -1,0 +1,67 @@
+name: Auto-merge Feature to Development
+
+on:
+  push:
+    branches:
+      - 'features/*'  # Triggers on any branch starting with 'feature/'
+      - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
+      - 'hotfix/*'     # Triggers on any branch starting with 'hotfix/' 
+  
+jobs:
+  auto-merge-and-notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure Git
+      run: |
+        git config --local user.email "softagi.tech@gmail.com"
+        git config --local user.name "ahmadgaad"
+    
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+    
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Merge to development branch
+      run: |
+        # Switch to development branch
+        git checkout development
+        git pull origin development
+        
+        # Merge feature branch
+        git merge --no-ff ${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"
+        
+        # Push to development
+        git push origin development
+    
+    - name: Send email notification
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com 
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "✅ Auto-merge Successful: ${{ github.ref_name }} → development"
+        to: ${{ secrets.TEAM_LEAD_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Hi Team Lead,
+          
+          A new feature branch has been automatically merged to the development branch and requires your code review.
+          
+          Branch Details:
+          - Feature Branch: ${{ github.ref_name }}
+          - Repository: ${{ github.repository }}
+          - Commit: ${{ github.sha }}
+          - Author: ${{ github.actor }}
+          - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          Please review the changes at:
+          ${{ github.server_url }}/${{ github.repository }}/compare/development...${{ github.ref_name }}
+          
+          Best regards,
+          Ahmed Gad

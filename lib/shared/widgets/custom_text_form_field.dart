@@ -2,23 +2,23 @@ import 'package:docdoc/core/configurations/themes/colors.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
 import 'package:flutter/material.dart';
 
-class CustomTextFromField extends StatelessWidget {
+class CustomTextFormField extends StatelessWidget {
   final String? Function(String? value)? validator;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final TextStyle? hintStyle;
   final Widget? suffixIcon;
-  final bool obscureText;
+  final bool obsecureText;
   final String? hint;
 
-  const CustomTextFromField({
+  const CustomTextFormField({
     super.key,
     this.controller,
     this.keyboardType,
     this.hint,
     this.hintStyle,
     this.validator,
-    this.obscureText = false,
+    this.obsecureText = false,
     this.suffixIcon,
   });
 
@@ -27,7 +27,7 @@ class CustomTextFromField extends StatelessWidget {
     return TextFormField(
       validator: validator,
       controller: controller,
-      obscureText: obscureText,
+      obscureText: obsecureText,
       style: TextStyles.font14DarkBlueMedium,
       onTapOutside: (_) => FocusScope.of(context).unfocus(),
       autovalidateMode: AutovalidateMode.onUserInteraction,

@@ -1,10 +1,12 @@
-
+import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
+import 'package:docdoc/core/extensions/navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class AlreadyHaveAnAccount extends StatelessWidget {
-  const AlreadyHaveAnAccount({super.key});
+  final bool isLogin;
+  const AlreadyHaveAnAccount({super.key, required this.isLogin});
 
   @override
   Widget build(BuildContext context) {
@@ -12,13 +14,22 @@ class AlreadyHaveAnAccount extends StatelessWidget {
       text: TextSpan(
         children: [
           TextSpan(
-            text: "Already have an account yet? ",
+            text: isLogin
+                ? "Don't have an account yet? "
+                : "Already have an account yet? ",
             style: TextStyles.font13DarkBlueMedium,
           ),
           TextSpan(
-            text: "Sign Up",
+            text: isLogin ? "Register" : "Login",
             style: TextStyles.font13BlueSemiBold,
-            recognizer: TapGestureRecognizer()..onTap = () {},
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (isLogin) {
+                  context.pushReplacementNamed(Routes.register);
+                } else {
+                  context.pushReplacementNamed(Routes.login);
+                }
+              },
           ),
         ],
       ),

@@ -1,9 +1,9 @@
 import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/di/dependency_injection.dart';
-import 'package:docdoc/easy_move_screen.dart';
 import 'package:docdoc/features/authentication/presentation/controller/auth_controller.dart';
 import 'package:docdoc/features/authentication/presentation/screens/login_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
+import 'package:docdoc/features/authentication/presentation/screens/register_screen.dart';
 import 'package:docdoc/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,8 +13,13 @@ class DocDocRouter {
     switch (settings.name) {
       case Routes.onboarding:
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
-      case Routes.easyMoveScreen:
-        return MaterialPageRoute(builder: (_) => EasyMoveScreen());
+      case Routes.register:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => sl<AuthController>(),
+            child: RegisterScreen(),
+          ),
+        );
       case Routes.login:
         return PageRouteBuilder(
           pageBuilder: (_, __, ___) => BlocProvider(

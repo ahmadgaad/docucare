@@ -53,7 +53,7 @@ class _LoginFormState extends State<LoginForm> {
       key: widget._formKey,
       child: Column(
         children: [
-          CustomTextFromField(
+          CustomTextFormField(
             controller: widget._emailController,
             validator: (value) {
               if (value == null ||
@@ -68,8 +68,8 @@ class _LoginFormState extends State<LoginForm> {
             hintStyle: TextStyles.font14GreyRegular,
           ),
           16.verticalSpace,
-          CustomTextFromField(
-            obscureText: isVisible,
+          CustomTextFormField(
+            obsecureText: isVisible,
             suffixIcon: IconButton(
               onPressed: () {
                 setState(() {
@@ -94,7 +94,6 @@ class _LoginFormState extends State<LoginForm> {
             hintStyle: TextStyles.font14GreyRegular,
           ),
           24.verticalSpace,
-          
           PasswordValidations(
             hasLowerCase: hasLowerCase,
             hasUpperCase: hasUpperCase,

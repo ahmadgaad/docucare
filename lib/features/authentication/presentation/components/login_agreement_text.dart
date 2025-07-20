@@ -3,7 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class LoginAgreementText extends StatelessWidget {
-  const LoginAgreementText({super.key});
+  final bool isLogin;
+  const LoginAgreementText({super.key, required this.isLogin});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,7 @@ class LoginAgreementText extends StatelessWidget {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'By logging, you agree to our ',
+            text: '${isLogin?'By logging': 'By register'}, you agree to our ',
             style: TextStyles.font13GreyRegular,
           ),
           TextSpan(

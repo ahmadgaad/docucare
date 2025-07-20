@@ -26,13 +26,21 @@ class SharedPrefService {
   }
 
   // Getters for different data types
-  String getString(String key, {String defaultValue = ''}) {
-    return _prefs?.getString(key) ?? defaultValue;
+  String? getString(String key) {
+    return _prefs?.getString(key);
   }
 
-  Future<String> getSecureString(String key, {String defaultValue = ''}) async {
+  Future<String?> getSecureString(String key) async {
     final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
-    return await storage.read(key: key) ?? '';
+    return await storage.read(key: key);
+  }
+
+  Future<void> setSecureString({
+    required String key,
+    required String value,
+  }) async {
+    final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+    await storage.write(key: key, value: value);
   }
 }
