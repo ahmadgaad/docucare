@@ -7,6 +7,10 @@ on:
       - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
       - 'hotfix/*'     # Triggers on any branch starting with 'hotfix/' 
   
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   auto-merge-and-notify:
     runs-on: ubuntu-latest
