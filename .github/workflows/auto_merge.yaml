@@ -26,30 +26,52 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
 
-    - name: Merge to development branch
+    - name: Merge to development via GitHub API
       id: merge
-      run: |
-        # Fetch all remote branches
-        git fetch --all
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            const result = await github.rest.repos.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'development',
+              head: context.ref_name,
+              commit_message: `Auto-merge: ${context.ref_name} into development`
+            });
         
-        # List available branches for debugging
-        echo "Available remote branches:"
-        git branch -r
+            console.log('Merge successful:', result.data.sha);
+            core.setOutput('merge_success', 'true');
+          } catch (error) {
+            console.log('Merge failed:', error.message);
+            core.setOutput('merge_success', 'false');
+            core.setFailed(`Merge failed: ${error.message}`);
+          }
+
+    # - name: Merge to development branch
+    #   id: merge
+    #   run: |
+    #     # Fetch all remote branches
+    #     git fetch --all
         
-        # Checkout development branch from remote
-        git checkout -B development origin/development
+    #     # List available branches for debugging
+    #     echo "Available remote branches:"
+    #     git branch -r
         
-        # Merge the feature branch
-        echo "Merging ${{ github.ref_name }} into development..."
-        if git merge --no-ff origin/${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"; then
-          echo "merge_success=true" >> $GITHUB_OUTPUT
-          echo "Merge successful, pushing to origin..."
-          git push origin development
-        else
-          echo "merge_success=false" >> $GITHUB_OUTPUT
-          echo "Merge failed due to conflicts"
-          exit 1
-        fi
+    #     # Checkout development branch from remote
+    #     git checkout -B development origin/development
+        
+    #     # Merge the feature branch
+    #     echo "Merging ${{ github.ref_name }} into development..."
+    #     if git merge --no-ff origin/${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"; then
+    #       echo "merge_success=true" >> $GITHUB_OUTPUT
+    #       echo "Merge successful, pushing to origin..."
+    #       git push origin development
+    #     else
+    #       echo "merge_success=false" >> $GITHUB_OUTPUT
+    #       echo "Merge failed due to conflicts"
+    #       exit 1
+    #     fi
     
     - name: Send email notification
       uses: dawidd6/action-send-mail@v3
