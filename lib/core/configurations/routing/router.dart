@@ -1,8 +1,12 @@
 import 'package:docdoc/core/configurations/routing/routes.dart';
+import 'package:docdoc/core/di/dependency_injection.dart';
 import 'package:docdoc/easy_move_screen.dart';
+import 'package:docdoc/features/authentication/presentation/controller/auth_controller.dart';
 import 'package:docdoc/features/authentication/presentation/screens/login_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
+import 'package:docdoc/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DocDocRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -13,7 +17,10 @@ class DocDocRouter {
         return MaterialPageRoute(builder: (_) => EasyMoveScreen());
       case Routes.login:
         return PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const LoginScreen(),
+          pageBuilder: (_, __, ___) => BlocProvider(
+            create: (context) => sl<AuthController>(),
+            child: const LoginScreen(),
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -26,6 +33,8 @@ class DocDocRouter {
             return SlideTransition(position: offsetAnimation, child: child);
           },
         );
+      case Routes.home:
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
       default:
         return MaterialPageRoute(
           settings: settings,

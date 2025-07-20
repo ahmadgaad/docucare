@@ -1,6 +1,7 @@
 import 'package:docdoc/core/configurations/themes/styles.dart';
 import 'package:docdoc/core/helpers/regex.dart';
 import 'package:docdoc/shared/widgets/custom_text_form_field.dart';
+import 'package:docdoc/shared/widgets/password_validations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -24,6 +25,28 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool isVisible = false;
+  bool hasLowerCase = false;
+  bool hasUpperCase = false;
+  bool hasSpecialCharacter = false;
+  bool hasNumber = false;
+  bool hasMinLength = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget._passwordController.addListener(() {
+      setState(() {
+        hasLowerCase = Regex.hasLowerCase(widget._passwordController.text);
+        hasUpperCase = Regex.hasUpperCase(widget._passwordController.text);
+        hasSpecialCharacter = Regex.hasSpecialCharacter(
+          widget._passwordController.text,
+        );
+        hasNumber = Regex.hasNumber(widget._passwordController.text);
+        hasMinLength = Regex.hasMinLength(widget._passwordController.text);
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -69,6 +92,15 @@ class _LoginFormState extends State<LoginForm> {
             keyboardType: TextInputType.visiblePassword,
             hint: 'Password',
             hintStyle: TextStyles.font14GreyRegular,
+          ),
+          24.verticalSpace,
+          
+          PasswordValidations(
+            hasLowerCase: hasLowerCase,
+            hasUpperCase: hasUpperCase,
+            hasSpecialCharater: hasSpecialCharacter,
+            hasNumber: hasNumber,
+            hasMinLength: hasMinLength,
           ),
         ],
       ),

@@ -1,0 +1,20 @@
+import 'package:docdoc/core/networking/api_service.dart';
+import 'package:docdoc/core/networking/dio_factory.dart';
+import 'package:docdoc/features/authentication/data/repositories/login_repository.dart';
+import 'package:docdoc/features/authentication/presentation/controller/auth_controller.dart';
+import 'package:get_it/get_it.dart';
+
+final sl = GetIt.instance;
+Future<void> initGetIt() async {
+  // login
+  sl.registerLazySingleton<LoginRepository>(() => LoginRepositoryImpl(sl()));
+  sl.registerFactory(() => AuthController(sl()));
+
+  // // signup
+  // sl.registerLazySingleton<SignUpRepository>(() => SignUpRepositoryImpl(apiService: sl()));
+  // sl.registerFactory(() => SignUpCubit(sl()));
+
+  //! EXTERNAL
+  final dio = DioFactory.getDio();
+  sl.registerLazySingleton<ApiService>(() => ApiService(dio));
+}
