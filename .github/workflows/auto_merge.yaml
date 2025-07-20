@@ -36,18 +36,25 @@ jobs:
       with:
         script: |
           try {
+            // Extract branch name from the ref (removes 'refs/heads/')
+            const headBranch = context.ref.replace('refs/heads/', '');
+            console.log('Attempting to merge:', headBranch, '-> development');
+            
             const result = await github.rest.repos.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: 'development',
-              head: context.ref_name,
-              commit_message: `Auto-merge: ${context.ref_name} into development`
+              head: headBranch,
+              commit_message: `Auto-merge: ${headBranch} into development`
             });
-        
+            
             console.log('Merge successful:', result.data.sha);
             core.setOutput('merge_success', 'true');
+            core.setOutput('merge_sha', result.data.sha);
           } catch (error) {
             console.log('Merge failed:', error.message);
+            console.log('Context ref:', context.ref);
+            console.log('Context ref_name:', context.ref_name);
             core.setOutput('merge_success', 'false');
             core.setFailed(`Merge failed: ${error.message}`);
           }
