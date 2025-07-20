@@ -1,3 +1,5 @@
+import 'package:docdoc/core/di/dependency_injection.dart';
+import 'package:docdoc/core/helpers/shared_pref.dart';
 import 'package:docdoc/docdoc_app.dart';
 import 'package:docdoc/firebase_options.dart';
 import 'package:docdoc/flavors.dart';
@@ -9,6 +11,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ScreenUtil.ensureScreenSize();
+  await SharedPrefService.init();
+  await initGetIt();
   await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
