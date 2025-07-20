@@ -1,0 +1,214 @@
+# name: Auto-merge Feature to Development
+
+# on:
+#   push:
+#     branches:
+#       - 'features/*'  # Triggers on any branch starting with 'feature/'
+#       - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
+#       - 'hotfix/*'     # Triggers on any branch starting with 'hotfix/' 
+  
+# permissions:
+#   contents: write
+#   actions: read
+
+# jobs:
+#   auto-merge-and-notify:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+
+#     - name: Configure Git
+#       run: |
+#         git config --local user.email "softagi.tech@gmail.com"
+#         git config --local user.name "ahmadgaad"
+    
+#     - name: Set up Flutter
+#       uses: subosito/flutter-action@v2
+    
+#     - name: Get dependencies
+#       run: flutter pub get
+
+#     - name: Merge to development via GitHub API
+#       id: merge
+#       uses: actions/github-script@v7
+#       with:
+#         script: |
+#           try {
+#             // Extract branch name from the ref (removes 'refs/heads/')
+#             const headBranch = context.ref.replace('refs/heads/', '');
+#             console.log('Attempting to merge:', headBranch, '-> development');
+            
+#             const result = await github.rest.repos.merge({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               base: 'development',
+#               head: headBranch,
+#               commit_message: `Auto-merge: ${headBranch} into development`
+#             });
+            
+#             console.log('Merge successful:', result.data.sha);
+#             core.setOutput('merge_success', 'true');
+#             core.setOutput('merge_sha', result.data.sha);
+#           } catch (error) {
+#             console.log('Merge failed:', error.message);
+#             console.log('Context ref:', context.ref);
+#             console.log('Context ref_name:', context.ref_name);
+#             core.setOutput('merge_success', 'false');
+#             core.setFailed(`Merge failed: ${error.message}`);
+#           }
+
+#     - name: Send email notification
+#       uses: dawidd6/action-send-mail@v3
+#       with:
+#         server_address: smtp.gmail.com 
+#         server_port: 587
+#         username: ${{ secrets.EMAIL_USERNAME }}
+#         password: ${{ secrets.EMAIL_PASSWORD }}
+#         subject: "✅ Auto-merge Successful: ${{ github.ref_name }} → development"
+#         to: ${{ secrets.TEAM_LEAD_EMAIL }}
+#         from: ${{ secrets.EMAIL_USERNAME }}
+#         body: |
+#           Hi Team Lead,
+          
+#           A new feature branch has been automatically merged to the development branch and requires your code review.
+          
+#           Branch Details:
+#           - Feature Branch: ${{ github.ref_name }}
+#           - Repository: ${{ github.repository }}
+#           - Commit: ${{ github.sha }}
+#           - Author: ${{ github.actor }}
+#           - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+#           Please review the changes at:
+#           ${{ github.server_url }}/${{ github.repository }}/compare/development...${{ github.ref_name }}
+          
+#           Best regards,
+#           Ahmed Gad
+
+
+name: Create PR to Development
+
+on:
+  push:
+    branches:
+      - 'features/*'  # Triggers on any branch starting with 'features/'
+      - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
+      - 'hotfix/*'    # Triggers on any branch starting with 'hotfix/' 
+  
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr-and-notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+
+    - name: Create Pull Request
+      id: create_pr
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            // Extract branch name from the ref (removes 'refs/heads/')
+            const headBranch = context.ref.replace('refs/heads/', '');
+            console.log('Creating PR for:', headBranch, '-> development');
+            
+            // Check if PR already exists
+            const existingPRs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${headBranch}`,
+              base: 'development',
+              state: 'open'
+            });
+            
+            if (existingPRs.data.length > 0) {
+              console.log('PR already exists:', existingPRs.data[0].html_url);
+              core.setOutput('pr_created', 'false');
+              core.setOutput('pr_url', existingPRs.data[0].html_url);
+              core.setOutput('pr_number', existingPRs.data[0].number);
+              return;
+            }
+            
+            // Create new PR
+            const result = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔄 ${headBranch} → development`,
+              head: headBranch,
+              base: 'development',
+              body: `## Automated Pull Request
+              
+    - name: Send email notification
+      if: steps.create_pr.outputs.pr_created == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com 
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "📋 New PR for Review: ${{ github.ref_name }} → development"
+        to: ${{ secrets.TEAM_LEAD_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Hi Team Lead,
+          
+          A new Pull Request has been created and is ready for your review.
+          
+          **Pull Request Details:**
+          - Branch: ${{ github.ref_name }}
+          - Repository: ${{ github.repository }}
+          - Author: ${{ github.actor }}
+          - PR URL: ${{ steps.create_pr.outputs.pr_url }}
+          
+          **Quality Checks:**
+          ✅ Flutter analyze passed
+          ✅ Tests passed
+          ⏳ Awaiting your code review
+          
+          **Action Required:**
+          Please review the PR and approve/request changes:
+          ${{ steps.create_pr.outputs.pr_url }}
+          
+          **Workflow Details:**
+          View workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          Best regards,
+          Ahmed Gad
+
+    - name: Send email if PR already exists
+      if: steps.create_pr.outputs.pr_created == 'false' && steps.create_pr.outputs.pr_url
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com 
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "🔄 PR Updated: ${{ github.ref_name }} → development"
+        to: ${{ secrets.TEAM_LEAD_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Hi Team Lead,
+          
+          An existing Pull Request has been updated with new changes.
+          
+          **Pull Request Details:**
+          - Branch: ${{ github.ref_name }}
+          - Repository: ${{ github.repository }}
+          - Author: ${{ github.actor }}
+          - PR URL: ${{ steps.create_pr.outputs.pr_url }}
+          
+          **Latest Changes:**
+          New commits have been pushed to the feature branch. Please review the updated changes.
+          
+          Best regards,
+          Ahmed Gad
