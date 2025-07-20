@@ -27,16 +27,29 @@ jobs:
       run: flutter pub get
 
     - name: Merge to development branch
+      id: merge
       run: |
-        # Switch to development branch
-        git checkout development
-        git pull origin development
+        # Fetch all remote branches
+        git fetch --all
         
-        # Merge feature branch
-        git merge --no-ff ${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"
+        # List available branches for debugging
+        echo "Available remote branches:"
+        git branch -r
         
-        # Push to development
-        git push origin development
+        # Checkout development branch from remote
+        git checkout -B development origin/development
+        
+        # Merge the feature branch
+        echo "Merging ${{ github.ref_name }} into development..."
+        if git merge --no-ff origin/${{ github.ref_name }} -m "Auto-merge: ${{ github.ref_name }} into development"; then
+          echo "merge_success=true" >> $GITHUB_OUTPUT
+          echo "Merge successful, pushing to origin..."
+          git push origin development
+        else
+          echo "merge_success=false" >> $GITHUB_OUTPUT
+          echo "Merge failed due to conflicts"
+          exit 1
+        fi
     
     - name: Send email notification
       uses: dawidd6/action-send-mail@v3
