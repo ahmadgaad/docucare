@@ -30,6 +30,10 @@ class SharedPrefService {
     return _prefs?.getString(key);
   }
 
+  Future<bool?> setString({required String key, required String value}) async {
+    return await _prefs?.setString(key, value);
+  }
+
   Future<String?> getSecureString(String key) async {
     final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 

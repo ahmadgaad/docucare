@@ -19,6 +19,7 @@ class AuthController extends Cubit<AuthStates> {
     result.when(
       success: (data) async {
         final prefs = SharedPrefService();
+        await prefs.setString(key: 'name', value: data.user.user);
         await prefs.setSecureString(key: 'token', value: data.user.token);
         log(data.user.token, name: 'Login successful');
         emit(AuthStates.success(data));
