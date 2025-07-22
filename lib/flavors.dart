@@ -20,7 +20,6 @@ class FlavorConfig {
     switch (appFlavor) {
       case Flavor.development:
         return 'https://vcare.integration25.com/api';
-      //TODO: Add BaseUrl for Production
       case Flavor.production:
         return 'https://vcare.integration25.com/api';
       default:

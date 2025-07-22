@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 part 'api_error_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ApiErrorModel {
   final String? message;
   final int? code;
-
+  
   ApiErrorModel({
     required this.message,
     this.code,

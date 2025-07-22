@@ -7,4 +7,5 @@ class Svgs {
       "$_path/onboarding_docdoc_logo_low_opacity.svg";
   static const String facebookLogo = "$_path/facebook_logo.svg";
   static const String googleLogo = "$_path/google_logo.svg";
+  static const String nurse = "$_path/nurse.svg";
 }
