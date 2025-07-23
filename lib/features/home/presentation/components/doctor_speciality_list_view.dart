@@ -1,5 +1,5 @@
 import 'package:docdoc/core/configurations/themes/styles.dart';
-import 'package:docdoc/features/home/presentation/components/title_with_see_all_button.dart';
+import 'package:docdoc/features/home/presentation/components/doctor_speciality_see_all_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -10,7 +10,7 @@ class DoctorSpecialityListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TitleWithSeeAllButton(title: 'Doctor Speciality'),
+        DoctorSpecialitySeeAll(title: 'Doctor Speciality'),
         16.verticalSpace,
         SizedBox(
           height: 120.h,

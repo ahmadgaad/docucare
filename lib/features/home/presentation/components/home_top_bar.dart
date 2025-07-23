@@ -1,10 +1,12 @@
 import 'package:docdoc/core/configurations/themes/colors.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
+import 'package:docdoc/shared/utils/svgs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 
-class HeaderOfNameAndNotificationButton extends StatelessWidget {
-  const HeaderOfNameAndNotificationButton({super.key, required this.name});
+class HomeTopBar extends StatelessWidget {
+  const HomeTopBar({super.key, required this.name});
 
   final String? name;
 
@@ -34,15 +36,12 @@ class HeaderOfNameAndNotificationButton extends StatelessWidget {
           child: IconButton(
             icon: Stack(
               alignment: Alignment.topRight,
+              clipBehavior: Clip.none,
               children: [
-                Icon(
-                  Icons.notifications_none_outlined,
-                  color: Colors.black,
-                  size: 35,
-                ),
+                SvgPicture.asset(Svgs.notificationIcon, width: 28, height: 28),
                 PositionedDirectional(
-                  end: 5,
-                  top: 4,
+                  end: -1,
+                  top: -3,
                   child: Container(
                     width: 12.w,
                     height: 12.h,

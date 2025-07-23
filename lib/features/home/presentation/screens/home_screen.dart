@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
 import 'package:docdoc/core/helpers/shared_pref.dart';
 import 'package:docdoc/features/home/presentation/components/doctor_speciality_list_view.dart';
-import 'package:docdoc/features/home/presentation/components/header_of_name_and_notification_button.dart';
+import 'package:docdoc/features/home/presentation/components/doctor_speciality_see_all_button.dart';
+import 'package:docdoc/features/home/presentation/components/home_top_bar.dart';
 import 'package:docdoc/features/home/presentation/components/nearby_doctor_card.dart';
-import 'package:docdoc/features/home/presentation/components/title_with_see_all_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -31,12 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              HeaderOfNameAndNotificationButton(name: name),
+              HomeTopBar(name: name),
               34.verticalSpace,
               NearbyDoctorCard(),
               24.verticalSpace,
               DoctorSpecialityListView(),
-              TitleWithSeeAllButton(
+              DoctorSpecialitySeeAll(
                 title: 'Recommendation Doctor',
                 onPressed: () {},
               ),

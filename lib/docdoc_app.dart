@@ -25,7 +25,7 @@ class DocDocApp extends StatelessWidget {
         theme: lightTheme(),
         darkTheme: darkTheme(),
         themeMode: ThemeMode.light,
-        initialRoute: token != null ? Routes.home : Routes.login,
+        initialRoute: token != null ? Routes.layout : Routes.login,
         onGenerateRoute: DocDocRouter.generateRoute,
       ),
     );

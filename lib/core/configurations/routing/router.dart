@@ -5,12 +5,15 @@ import 'package:docdoc/features/authentication/presentation/screens/login_screen
 import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/register_screen.dart';
 import 'package:docdoc/features/home/presentation/screens/home_screen.dart';
+import 'package:docdoc/features/home/presentation/screens/layout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DocDocRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case Routes.layout:
+        return MaterialPageRoute(builder: (_) => const LayoutScreen());
       case Routes.onboarding:
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
       case Routes.register:
