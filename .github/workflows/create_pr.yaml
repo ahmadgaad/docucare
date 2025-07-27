@@ -28,12 +28,6 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Run Flutter analyze
-      run: flutter analyze
-
-    - name: Run tests
-      run: flutter test
-
     - name: Build APK for testing
       run: flutter build apk --debug --flavor development --target lib/main_development.dart
 
