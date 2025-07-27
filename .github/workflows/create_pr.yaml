@@ -38,32 +38,32 @@ jobs:
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
         script: |
+          set -e
           echo "Emulator started, installing APK..."
           
           # List available APKs to debug path issues
           find build/app/outputs -name "*.apk" -type f
           
-          # Install the APK (try different possible paths)
+          # Find the correct APK file
           if [ -f "build/app/outputs/flutter-apk/app-development-debug.apk" ]; then
-            echo "Installing app-development-debug.apk"
-            adb install build/app/outputs/flutter-apk/app-development-debug.apk
-          elif [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
-            echo "Installing app-debug.apk"
-            adb install build/app/outputs/flutter-apk/app-debug.apk
+            APK_FILE="build/app/outputs/flutter-apk/app-development-debug.apk"
+            echo "Using flutter-apk path: $APK_FILE"
           elif [ -f "build/app/outputs/apk/development/debug/app-development-debug.apk" ]; then
-            echo "Installing from apk/development/debug path"
-            adb install build/app/outputs/apk/development/debug/app-development-debug.apk
+            APK_FILE="build/app/outputs/apk/development/debug/app-development-debug.apk"
+            echo "Using apk/development/debug path: $APK_FILE"
           else
-            echo "APK not found, trying alternative paths..."
-            APK_PATH=$(find build/app/outputs -name "*.apk" -type f | head -1)
-            if [ -n "$APK_PATH" ]; then
-              echo "Installing APK: $APK_PATH"
-              adb install "$APK_PATH"
+            APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
+            if [ -n "$APK_FILE" ]; then
+              echo "Using first found APK: $APK_FILE"
             else
               echo "No APK found!"
               exit 1
             fi
           fi
+          
+          # Install the APK
+          echo "Installing APK: $APK_FILE"
+          adb install "$APK_FILE"
           
           # Get package name from pubspec.yaml
           PACKAGE_NAME=$(grep "^name:" pubspec.yaml | cut -d' ' -f2 | tr -d '\r')
@@ -78,6 +78,7 @@ jobs:
           adb shell am start -n ${PACKAGE_NAME}/.MainActivity
           
           # Wait for app to fully load
+          echo "Waiting for app to load..."
           sleep 15
           
           # Create screenshots directory
@@ -247,7 +248,6 @@ jobs:
           
           Best regards,
           Ahmed Gad
-
 
 
 
