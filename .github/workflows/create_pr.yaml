@@ -21,8 +21,20 @@ jobs:
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        cache: true
 
-    - name: Build APK 
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run Flutter analyze
+      run: flutter analyze
+
+    - name: Run tests
+      run: flutter test
+
+    - name: Build APK for testing
       run: flutter build apk --debug --flavor development --target lib/main_development.dart
 
     - name: Create screenshot script
@@ -33,6 +45,7 @@ jobs:
         echo "🚀 Starting screenshot capture process..."
         mkdir -p screenshots
         
+        # Find and install APK
         APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
         if [ -z "$APK_FILE" ]; then
           echo "❌ No APK found!"
@@ -42,26 +55,73 @@ jobs:
         echo "📦 Installing APK: $APK_FILE"
         adb install "$APK_FILE"
         
-        PACKAGE_NAME="com.example.$(basename $(pwd))"
-        echo "📱 Package name: $PACKAGE_NAME"
+        # Get the actual package name from the APK
+        PACKAGE_NAME=$(aapt dump badging "$APK_FILE" | grep package | awk -v FS="'" '/package:/{print $2}')
+        echo "📱 Detected package name: $PACKAGE_NAME"
         
-        echo "🔥 Launching app..."
+        # Alternative method if aapt fails
+        if [ -z "$PACKAGE_NAME" ]; then
+          PACKAGE_NAME=$(adb shell pm list packages | grep -E "(com\.|org\.|dev\.)" | tail -1 | cut -d: -f2)
+          echo "📱 Fallback package name: $PACKAGE_NAME"
+        fi
+        
+        # Wait for device to be fully ready
+        echo "⏳ Waiting for device to be ready..."
+        adb wait-for-device
+        sleep 5
+        
+        # Launch the app with multiple attempts
+        echo "🔥 Launching app: $PACKAGE_NAME"
+        
+        # Method 1: Try with .MainActivity
         adb shell am start -n "${PACKAGE_NAME}/.MainActivity" || \
-        adb shell am start -n "${PACKAGE_NAME}/com.example.$(basename $(pwd)).MainActivity"
+        # Method 2: Try with full path
+        adb shell am start -n "${PACKAGE_NAME}/com.example.myapp.MainActivity" || \
+        # Method 3: Try launching the main activity
+        adb shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1 || \
+        # Method 4: Force start
+        adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "${PACKAGE_NAME}/.MainActivity"
         
-        sleep 10
+        # Wait longer for app to fully load
+        echo "⏳ Waiting for app to load..."
+        sleep 15
         
-        for i in {1..3}; do
-          echo "📸 Taking screenshot $i..."
-          adb exec-out screencap -p > "screenshots/screenshot_$i.png"
-          if [ $i -lt 3 ]; then
-            adb shell input tap 500 1000
-            sleep 3
-          fi
-        done
+        # Check if app is running
+        adb shell "ps | grep $PACKAGE_NAME" || adb shell "ps -ef | grep $PACKAGE_NAME"
+        
+        # Take screenshots with longer intervals
+        echo "📸 Taking screenshot 1 (App Launch)..."
+        adb exec-out screencap -p > screenshots/screenshot_1.png
+        
+        # Light interaction
+        echo "🖱️ Tapping screen..."
+        adb shell input tap 720 1280  # Center of typical phone screen
+        sleep 5
+        
+        echo "📸 Taking screenshot 2 (After tap)..."
+        adb exec-out screencap -p > screenshots/screenshot_2.png
+        
+        # Scroll or swipe
+        echo "📱 Performing swipe gesture..."
+        adb shell input swipe 360 1800 360 800 1000  # Vertical swipe
+        sleep 5
+        
+        echo "📸 Taking screenshot 3 (After swipe)..."
+        adb exec-out screencap -p > screenshots/screenshot_3.png
+        
+        # Additional screenshot after back to home
+        echo "🏠 Checking current activity..."
+        adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
+        
+        echo "📸 Taking screenshot 4 (Current state)..."
+        adb exec-out screencap -p > screenshots/screenshot_4.png
         
         echo "✅ Screenshots captured successfully"
         ls -la screenshots/
+        
+        # Debug: Show what apps are currently running
+        echo "🔍 Currently running apps:"
+        adb shell "ps | grep -v kernel" || adb shell "ps -ef | head -20"
         EOF
         chmod +x screenshot.sh
 
@@ -124,12 +184,6 @@ jobs:
           - ✅ APK build successful
           - ✅ Screenshots captured
 
-          ### 🔍 Review Checklist
-          - [ ] Code review completed
-          - [ ] Screenshots verified
-          - [ ] Tests are passing
-          - [ ] Ready to merge
-
           *This PR was automatically created. Please review and merge when ready.*`;
 
           if (existingPRs.length > 0) {
@@ -148,7 +202,7 @@ jobs:
             core.setOutput('pr_updated', 'true');
             core.setOutput('pr_url', pr.html_url);
             core.setOutput('pr_number', pr.number);
-            } else {
+          } else {
             // Create new PR
             console.log(`✨ Creating new PR: ${headBranch} → ${baseBranch}`);
             
@@ -207,7 +261,6 @@ jobs:
           ---
           *Automated by GitHub Actions*  
           Best regards, Ahmed Gad
-
 
 
 
