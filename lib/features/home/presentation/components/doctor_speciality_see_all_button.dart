@@ -1,10 +1,14 @@
 import 'package:docdoc/core/configurations/themes/styles.dart';
 import 'package:flutter/material.dart';
 
-class TitleWithSeeAllButton extends StatelessWidget {
+class DoctorSpecialitySeeAll extends StatelessWidget {
   final String title;
   final void Function()? onPressed;
-  const TitleWithSeeAllButton({super.key, required this.title, this.onPressed});
+  const DoctorSpecialitySeeAll({
+    super.key,
+    required this.title,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {

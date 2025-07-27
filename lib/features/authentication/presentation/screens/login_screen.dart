@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       success: (data) {
-                        context.pushNamed(Routes.home);
+                        context.pushNamed(Routes.layout);
                       },
                       error: (message) {
                         Navigator.of(context).pop(); // Close the loading dialog
