@@ -26,7 +26,7 @@ jobs:
       run: flutter pub get
 
     - name: Build APK for screenshots
-      run: flutter build apk --debug
+      run: flutter build apk --debug --flavor development --target lib/main_development.dart
 
     - name: Set up Android emulator
       uses: reactivecircus/android-emulator-runner@v2
@@ -47,8 +47,10 @@ jobs:
         arch: x86_64
         profile: Nexus 6
         script: |
-          # Install the APK
-          adb install build/app/outputs/flutter-apk/app-debug.apk
+          # Install the APK (flavor-specific path)
+          adb install build/app/outputs/flutter-apk/app-development-debug.apk
+          
+
           
           # Get package name from pubspec.yaml or use default
           PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
