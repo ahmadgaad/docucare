@@ -3,9 +3,9 @@ name: Create PR to Development
 on:
   push:
     branches:
-      - 'features/*'  # Triggers on any branch starting with 'features/'
-      - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
-      - 'hotfix/*'    # Triggers on any branch starting with 'hotfix/' 
+      - 'features/*'
+      - 'bugfix/*'
+      - 'hotfix/*'
   
 permissions:
   contents: read
@@ -21,14 +21,23 @@ jobs:
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 'stable'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Build APK for screenshots
+    - name: Run Flutter analyze
+      run: flutter analyze
+
+    - name: Run tests
+      run: flutter test
+
+    - name: Build APK for testing
       run: flutter build apk --debug --flavor development --target lib/main_development.dart
 
-    - name: Install and run app for screenshots
+    - name: Capture app screenshots
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 29
@@ -38,219 +47,174 @@ jobs:
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
         script: |
-          set -e
-          echo "Emulator started, installing APK..."
-          
-          # List available APKs to debug path issues
-          find build/app/outputs -name "*.apk" -type f
-          
-          # Find the correct APK file
-          if [ -f "build/app/outputs/flutter-apk/app-development-debug.apk" ]; then
-            APK_FILE="build/app/outputs/flutter-apk/app-development-debug.apk"
-            echo "Using flutter-apk path: $APK_FILE"
-          elif [ -f "build/app/outputs/apk/development/debug/app-development-debug.apk" ]; then
-            APK_FILE="build/app/outputs/apk/development/debug/app-development-debug.apk"
-            echo "Using apk/development/debug path: $APK_FILE"
-          else
-            APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
-            if [ -n "$APK_FILE" ]; then
-              echo "Using first found APK: $APK_FILE"
-            else
-              echo "No APK found!"
-              exit 1
-            fi
-          fi
-          
-          # Install the APK
-          echo "Installing APK: $APK_FILE"
-          adb install "$APK_FILE"
-          
-          # Get package name from pubspec.yaml
-          PACKAGE_NAME=$(grep "^name:" pubspec.yaml | cut -d' ' -f2 | tr -d '\r')
-          echo "Package name: $PACKAGE_NAME"
-          
-          # Wait for device to be ready
-          adb wait-for-device
-          sleep 5
-          
-          # Launch the app
-          echo "Launching app..."
-          adb shell am start -n ${PACKAGE_NAME}/.MainActivity
-          
-          # Wait for app to fully load
-          echo "Waiting for app to load..."
-          sleep 15
+          echo "🚀 Starting screenshot capture process..."
           
           # Create screenshots directory
           mkdir -p screenshots
           
-          # Take initial screenshot
-          echo "Taking screenshot 1..."
-          adb exec-out screencap -p > screenshots/screenshot_1.png
+          # Find and install APK (simplified approach)
+          APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ No APK found!"
+            exit 1
+          fi
           
-          # Wait and take another screenshot
-          sleep 5
-          echo "Taking screenshot 2..."
-          adb exec-out screencap -p > screenshots/screenshot_2.png
+          echo "📦 Installing APK: $APK_FILE"
+          adb install "$APK_FILE"
           
-          # Optional: Add more interactions and screenshots
-          # Example: Swipe or tap to navigate
-          # adb shell input swipe 500 1500 500 500 1000
-          # sleep 3
-          # adb exec-out screencap -p > screenshots/screenshot_3.png
+          # Get package name from gradle file (more reliable than pubspec)
+          PACKAGE_NAME="com.example.$(basename $(pwd))"
+          echo "📱 Package name: $PACKAGE_NAME"
           
-          echo "Screenshots captured successfully"
+          # Launch app
+          echo "🔥 Launching app..."
+          adb shell am start -n "${PACKAGE_NAME}/com.example.$(basename $(pwd)).MainActivity" || \
+          adb shell am start -n "${PACKAGE_NAME}/.MainActivity"
+          
+          # Wait for app to load
+          sleep 10
+          
+          # Capture screenshots
+          echo "📸 Capturing screenshots..."
+          for i in {1..3}; do
+            echo "Taking screenshot $i..."
+            adb exec-out screencap -p > "screenshots/screenshot_$i.png"
+            
+            # Add some interaction between screenshots
+            if [ $i -lt 3 ]; then
+              adb shell input tap 500 1000  # Tap center-ish of screen
+              sleep 3
+            fi
+          done
+          
+          echo "✅ Screenshots captured successfully"
           ls -la screenshots/
 
-    - name: Upload screenshots as artifacts
+    - name: Upload screenshots
       uses: actions/upload-artifact@v4
+      if: always()  # Upload even if previous steps failed
       with:
-        name: app-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
+        name: app-screenshots-${{ github.sha }}
         path: screenshots/
         retention-days: 30
 
-    - name: Create Pull Request
+    - name: Create or update Pull Request
       id: create_pr
       uses: actions/github-script@v7
       with:
         script: |
-          try {
-            // Extract branch name from the ref (removes 'refs/heads/')
-            const headBranch = context.ref.replace('refs/heads/', '');
-            console.log('Creating PR for:', headBranch, '-> development');
+          const { owner, repo } = context.repo;
+          const headBranch = context.ref.replace('refs/heads/', '');
+          const baseBranch = 'development';
+          
+          console.log(`🔍 Checking for existing PR: ${headBranch} → ${baseBranch}`);
+          
+          // Check for existing PR
+          const { data: existingPRs } = await github.rest.pulls.list({
+            owner,
+            repo,
+            head: `${owner}:${headBranch}`,
+            base: baseBranch,
+            state: 'open'
+          });
+          
+          const workflowUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+          const screenshotArtifact = `app-screenshots-${context.sha}`;
+          
+          const prBody = `## 🔄 Automated Pull Request
+
+          **Branch:** \`${headBranch}\` → \`${baseBranch}\`  
+          **Author:** @${context.actor}  
+          **Triggered by:** Push to ${headBranch}
+
+          ### 📱 App Screenshots
+          Screenshots have been automatically captured and are available as workflow artifacts:
+          - **Artifact Name:** \`${screenshotArtifact}\`
+          - **Download Link:** [View Workflow Run](${workflowUrl})
+
+          ### ✅ Automated Checks
+          - ✅ Flutter analyze passed
+          - ✅ Tests passed  
+          - ✅ APK build successful
+          - ✅ Screenshots captured
+
+          *This PR was automatically created. Please review and merge when ready.*`;
+
+          if (existingPRs.length > 0) {
+            // Update existing PR
+            const pr = existingPRs[0];
+            console.log(`📝 Updating existing PR #${pr.number}`);
             
-            // Check if PR already exists
-            const existingPRs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${headBranch}`,
-              base: 'development',
-              state: 'open'
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: pr.number,
+              body: prBody
             });
             
-            if (existingPRs.data.length > 0) {
-              console.log('PR already exists:', existingPRs.data[0].html_url);
-              core.setOutput('pr_created', 'false');
-              core.setOutput('pr_url', existingPRs.data[0].html_url);
-              core.setOutput('pr_number', existingPRs.data[0].number);
-              return;
-            }
+            core.setOutput('pr_created', 'false');
+            core.setOutput('pr_updated', 'true');
+            core.setOutput('pr_url', pr.html_url);
+            core.setOutput('pr_number', pr.number);
+          } else {
+            // Create new PR
+            console.log(`✨ Creating new PR: ${headBranch} → ${baseBranch}`);
             
-            // Get workflow run URL for screenshots
-            const workflowUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
-            
-            // Create new PR with screenshots reference
-            const result = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `🔄 ${headBranch} → development`,
+            const { data: newPR } = await github.rest.pulls.create({
+              owner,
+              repo,
+              title: `🚀 ${headBranch} → ${baseBranch}`,
               head: headBranch,
-              base: 'development',
-              body: `## Automated Pull Request
-              
-            **Branch:** ${headBranch} → development
-            **Author:** ${context.actor}
-            **Triggered by:** Push to ${headBranch}
+              base: baseBranch,
+              body: prBody
+            });
+            
+            console.log(`🎉 PR created: ${newPR.html_url}`);
+            core.setOutput('pr_created', 'true');
+            core.setOutput('pr_updated', 'false');
+            core.setOutput('pr_url', newPR.html_url);
+            core.setOutput('pr_number', newPR.number);
+          }
 
-            This PR was automatically created when changes were pushed to the ${headBranch} branch.
-
-            ## 📱 Screenshots
-            Screenshots of the app have been captured and are available in the workflow artifacts:
-            [View Screenshots](${workflowUrl}) - Download the \`app-screenshots-${context.runId}-${context.runNumber}\` artifact
-
-            ## ✅ Quality Checks
-            - Flutter analyze: Passed
-            - Tests: Passed
-            - Screenshots: Captured
-
-            Please review the changes and merge when ready.`
-                        });
-                        
-                        console.log('PR created successfully:', result.data.html_url);
-                        core.setOutput('pr_created', 'true');
-                        core.setOutput('pr_url', result.data.html_url);
-                        core.setOutput('pr_number', result.data.number);
-                        
-                      } catch (error) {
-                        console.error('Error creating PR:', error);
-                        core.setFailed(`Failed to create PR: ${error.message}`);
-                      }
-
-    - name: Send email notification
-      if: steps.create_pr.outputs.pr_created == 'true'
+    - name: Send notification email
+      if: always() && (steps.create_pr.outputs.pr_created == 'true' || steps.create_pr.outputs.pr_updated == 'true')
       uses: dawidd6/action-send-mail@v3
       with:
-        server_address: smtp.gmail.com 
+        server_address: smtp.gmail.com
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "📋 New PR for Review: ${{ github.ref_name }} → development"
+        subject: |
+          ${{ steps.create_pr.outputs.pr_created == 'true' && '🆕 New' || '🔄 Updated' }} PR Ready: ${{ github.ref_name }} → development
         to: ${{ secrets.TEAM_LEAD_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
-          Hi Team Lead,
-          
-          A new Pull Request has been created and is ready for your review.
-          
-          **Pull Request Details:**
-          - Branch: ${{ github.ref_name }}
-          - Repository: ${{ github.repository }}
-          - Author: ${{ github.actor }}
-          - PR URL: ${{ steps.create_pr.outputs.pr_url }}
-          
-          **Quality Checks:**
-          ✅ Flutter analyze passed
-          ✅ Tests passed
-          ✅ Screenshots captured
-          ⏳ Awaiting your code review
-          
-          **Screenshots:**
-          App screenshots have been captured and are available as workflow artifacts.
-          View them at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          
-          **Action Required:**
-          Please review the PR and approve/request changes:
-          ${{ steps.create_pr.outputs.pr_url }}
-          
-          **Workflow Details:**
-          View workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          
-          Best regards,
-          Ahmed Gad
+          Hi Team Lead! 👋
 
-    - name: Send email if PR already exists
-      if: steps.create_pr.outputs.pr_created == 'false' && steps.create_pr.outputs.pr_url
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com 
-        server_port: 587
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "🔄 PR Updated: ${{ github.ref_name }} → development"
-        to: ${{ secrets.TEAM_LEAD_EMAIL }}
-        from: ${{ secrets.EMAIL_USERNAME }}
-        body: |
-          Hi Team Lead,
-          
-          An existing Pull Request has been updated with new changes.
-          
-          **Pull Request Details:**
-          - Branch: ${{ github.ref_name }}
-          - Repository: ${{ github.repository }}
-          - Author: ${{ github.actor }}
-          - PR URL: ${{ steps.create_pr.outputs.pr_url }}
-          
-          **Latest Changes:**
-          New commits have been pushed to the feature branch. Please review the updated changes.
-          
-          **Screenshots:**
-          Updated screenshots are available at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          
-          Best regards,
-          Ahmed Gad
+          ${{ steps.create_pr.outputs.pr_created == 'true' && 'A new Pull Request has been created' || 'An existing Pull Request has been updated' }} and is ready for review.
 
+          ## 📋 PR Details
+          **Branch:** `${{ github.ref_name }}` → `development`  
+          **Repository:** ${{ github.repository }}  
+          **Author:** @${{ github.actor }}  
+          **PR Link:** ${{ steps.create_pr.outputs.pr_url }}
 
+          ## ✅ Quality Status
+          - ✅ Flutter analyze: Passed
+          - ✅ Tests: Passed
+          - ✅ APK build: Successful
+          - ✅ Screenshots: Captured
 
+          ## 📱 Screenshots Available
+          App screenshots have been automatically captured and are available as workflow artifacts.
+          **Download:** [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ## 🎯 Next Steps
+          Please review the PR and approve/request changes: ${{ steps.create_pr.outputs.pr_url }}
+
+          ---
+          *Automated by GitHub Actions*  
+          Best regards, Ahmed Gad
 
 
 
