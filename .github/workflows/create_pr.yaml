@@ -50,6 +50,9 @@ jobs:
           elif [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
             echo "Installing app-debug.apk"
             adb install build/app/outputs/flutter-apk/app-debug.apk
+          elif [ -f "build/app/outputs/apk/development/debug/app-development-debug.apk" ]; then
+            echo "Installing from apk/development/debug path"
+            adb install build/app/outputs/apk/development/debug/app-development-debug.apk
           else
             echo "APK not found, trying alternative paths..."
             APK_PATH=$(find build/app/outputs -name "*.apk" -type f | head -1)
@@ -244,7 +247,6 @@ jobs:
           
           Best regards,
           Ahmed Gad
-
 
 
 
