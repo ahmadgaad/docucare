@@ -28,17 +28,6 @@ jobs:
     - name: Build APK for screenshots
       run: flutter build apk --debug --flavor development --target lib/main_development.dart
 
-    - name: Set up Android emulator
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 29
-        target: default
-        arch: x86_64
-        profile: Nexus 6
-        script: |
-          echo "Emulator started"
-          adb devices
-
     - name: Install and run app for screenshots
       uses: reactivecircus/android-emulator-runner@v2
       with:
@@ -46,41 +35,73 @@ jobs:
         target: default
         arch: x86_64
         profile: Nexus 6
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        disable-animations: true
         script: |
-          # Install the APK (flavor-specific path)
-          adb install build/app/outputs/flutter-apk/app-development-debug.apk
+          echo "Emulator started, installing APK..."
           
-
+          # List available APKs to debug path issues
+          find build/app/outputs -name "*.apk" -type f
           
-          # Get package name from pubspec.yaml or use default
-          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          # Install the APK (try different possible paths)
+          if [ -f "build/app/outputs/flutter-apk/app-development-debug.apk" ]; then
+            echo "Installing app-development-debug.apk"
+            adb install build/app/outputs/flutter-apk/app-development-debug.apk
+          elif [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
+            echo "Installing app-debug.apk"
+            adb install build/app/outputs/flutter-apk/app-debug.apk
+          else
+            echo "APK not found, trying alternative paths..."
+            APK_PATH=$(find build/app/outputs -name "*.apk" -type f | head -1)
+            if [ -n "$APK_PATH" ]; then
+              echo "Installing APK: $APK_PATH"
+              adb install "$APK_PATH"
+            else
+              echo "No APK found!"
+              exit 1
+            fi
+          fi
+          
+          # Get package name from pubspec.yaml
+          PACKAGE_NAME=$(grep "^name:" pubspec.yaml | cut -d' ' -f2 | tr -d '\r')
+          echo "Package name: $PACKAGE_NAME"
+          
+          # Wait for device to be ready
+          adb wait-for-device
+          sleep 5
           
           # Launch the app
+          echo "Launching app..."
           adb shell am start -n ${PACKAGE_NAME}/.MainActivity
           
-          # Wait for app to load
-          sleep 10
+          # Wait for app to fully load
+          sleep 15
           
           # Create screenshots directory
           mkdir -p screenshots
           
-          # Take screenshots (adjust timing and interactions as needed)
+          # Take initial screenshot
+          echo "Taking screenshot 1..."
           adb exec-out screencap -p > screenshots/screenshot_1.png
           
-          # You can add more interactions and screenshots here
-          # Example: Navigate to different screens
+          # Wait and take another screenshot
           sleep 5
+          echo "Taking screenshot 2..."
           adb exec-out screencap -p > screenshots/screenshot_2.png
           
-          # Example: Interact with UI elements (tap coordinates)
-          # adb shell input tap 500 1000
+          # Optional: Add more interactions and screenshots
+          # Example: Swipe or tap to navigate
+          # adb shell input swipe 500 1500 500 500 1000
           # sleep 3
           # adb exec-out screencap -p > screenshots/screenshot_3.png
+          
+          echo "Screenshots captured successfully"
+          ls -la screenshots/
 
     - name: Upload screenshots as artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: app-screenshots-${{ github.ref_name }}
+        name: app-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
         path: screenshots/
         retention-days: 30
 
@@ -131,7 +152,7 @@ jobs:
 
             ## 📱 Screenshots
             Screenshots of the app have been captured and are available in the workflow artifacts:
-            [View Screenshots](${workflowUrl}) - Download the \`app-screenshots-${headBranch}\` artifact
+            [View Screenshots](${workflowUrl}) - Download the \`app-screenshots-${context.runId}-${context.runNumber}\` artifact
 
             ## ✅ Quality Checks
             - Flutter analyze: Passed
@@ -223,7 +244,6 @@ jobs:
           
           Best regards,
           Ahmed Gad
-
 
 
 
