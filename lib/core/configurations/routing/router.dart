@@ -4,7 +4,6 @@ import 'package:docdoc/features/authentication/presentation/controller/auth_cont
 import 'package:docdoc/features/authentication/presentation/screens/login_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/onboarding_screen.dart';
 import 'package:docdoc/features/authentication/presentation/screens/register_screen.dart';
-import 'package:docdoc/features/home/presentation/screens/home_screen.dart';
 import 'package:docdoc/features/home/presentation/screens/layout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,8 +40,13 @@ class DocDocRouter {
             return SlideTransition(position: offsetAnimation, child: child);
           },
         );
-      case Routes.home:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+      // case Routes.home:
+      //   return MaterialPageRoute(
+      //     builder: (_) => BlocProvider(
+      //       create: (context) => sl<HomeController>(),
+      //       child: const HomeScreen(),
+      //     ),
+      //   );
       default:
         return MaterialPageRoute(
           settings: settings,
