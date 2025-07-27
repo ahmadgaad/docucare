@@ -21,12 +21,61 @@ jobs:
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
 
+    - name: Run Flutter analyze
+      run: flutter analyze
+
+    - name: Run tests
+      run: flutter test
+
     - name: Build APK for testing
       run: flutter build apk --debug --flavor development --target lib/main_development.dart
+
+    - name: Create screenshot script
+      run: |
+        cat > screenshot.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        echo "🚀 Starting screenshot capture process..."
+        mkdir -p screenshots
+        
+        APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
+        if [ -z "$APK_FILE" ]; then
+          echo "❌ No APK found!"
+          exit 1
+        fi
+        
+        echo "📦 Installing APK: $APK_FILE"
+        adb install "$APK_FILE"
+        
+        PACKAGE_NAME="com.example.$(basename $(pwd))"
+        echo "📱 Package name: $PACKAGE_NAME"
+        
+        echo "🔥 Launching app..."
+        adb shell am start -n "${PACKAGE_NAME}/.MainActivity" || \
+        adb shell am start -n "${PACKAGE_NAME}/com.example.$(basename $(pwd)).MainActivity"
+        
+        sleep 10
+        
+        for i in {1..3}; do
+          echo "📸 Taking screenshot $i..."
+          adb exec-out screencap -p > "screenshots/screenshot_$i.png"
+          if [ $i -lt 3 ]; then
+            adb shell input tap 500 1000
+            sleep 3
+          fi
+        done
+        
+        echo "✅ Screenshots captured successfully"
+        ls -la screenshots/
+        EOF
+        chmod +x screenshot.sh
 
     - name: Capture app screenshots
       uses: reactivecircus/android-emulator-runner@v2
@@ -37,49 +86,7 @@ jobs:
         profile: Nexus 6
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
-        script: |
-          echo "🚀 Starting screenshot capture process..."
-          
-          # Create screenshots directory
-          mkdir -p screenshots
-          
-          # Find and install APK (simplified approach)
-          APK_FILE=$(find build/app/outputs -name "*.apk" -type f | head -1)
-          if [ -z "$APK_FILE" ]; then
-            echo "❌ No APK found!"
-            exit 1
-          fi
-          
-          echo "📦 Installing APK: $APK_FILE"
-          adb install "$APK_FILE"
-          
-          # Get package name from gradle file (more reliable than pubspec)
-          PACKAGE_NAME="com.example.$(basename $(pwd))"
-          echo "📱 Package name: $PACKAGE_NAME"
-          
-          # Launch app
-          echo "🔥 Launching app..."
-          adb shell am start -n "${PACKAGE_NAME}/com.example.$(basename $(pwd)).MainActivity" || \
-          adb shell am start -n "${PACKAGE_NAME}/.MainActivity"
-          
-          # Wait for app to load
-          sleep 10
-          
-          # Capture screenshots
-          echo "📸 Capturing screenshots..."
-          for i in {1..3}; do
-            echo "Taking screenshot $i..."
-            adb exec-out screencap -p > "screenshots/screenshot_$i.png"
-            
-            # Add some interaction between screenshots
-            if [ $i -lt 3 ]; then
-              adb shell input tap 500 1000  # Tap center-ish of screen
-              sleep 3
-            fi
-          done
-          
-          echo "✅ Screenshots captured successfully"
-          ls -la screenshots/
+        script: ./screenshot.sh
 
     - name: Upload screenshots
       uses: actions/upload-artifact@v4
@@ -129,6 +136,12 @@ jobs:
           - ✅ APK build successful
           - ✅ Screenshots captured
 
+          ### 🔍 Review Checklist
+          - [ ] Code review completed
+          - [ ] Screenshots verified
+          - [ ] Tests are passing
+          - [ ] Ready to merge
+
           *This PR was automatically created. Please review and merge when ready.*`;
 
           if (existingPRs.length > 0) {
@@ -147,7 +160,7 @@ jobs:
             core.setOutput('pr_updated', 'true');
             core.setOutput('pr_url', pr.html_url);
             core.setOutput('pr_number', pr.number);
-          } else {
+            } else {
             // Create new PR
             console.log(`✨ Creating new PR: ${headBranch} → ${baseBranch}`);
             
@@ -206,9 +219,6 @@ jobs:
           ---
           *Automated by GitHub Actions*  
           Best regards, Ahmed Gad
-
-
-
 
 
 
