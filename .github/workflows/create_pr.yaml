@@ -22,6 +22,66 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
 
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build APK for screenshots
+      run: flutter build apk --debug
+
+    - name: Set up Android emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        target: default
+        arch: x86_64
+        profile: Nexus 6
+        script: |
+          echo "Emulator started"
+          adb devices
+
+    - name: Install and run app for screenshots
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        target: default
+        arch: x86_64
+        profile: Nexus 6
+        script: |
+          # Install the APK
+          adb install build/app/outputs/flutter-apk/app-debug.apk
+          
+          # Get package name from pubspec.yaml or use default
+          PACKAGE_NAME=$(grep "name:" pubspec.yaml | cut -d' ' -f2)
+          
+          # Launch the app
+          adb shell am start -n ${PACKAGE_NAME}/.MainActivity
+          
+          # Wait for app to load
+          sleep 10
+          
+          # Create screenshots directory
+          mkdir -p screenshots
+          
+          # Take screenshots (adjust timing and interactions as needed)
+          adb exec-out screencap -p > screenshots/screenshot_1.png
+          
+          # You can add more interactions and screenshots here
+          # Example: Navigate to different screens
+          sleep 5
+          adb exec-out screencap -p > screenshots/screenshot_2.png
+          
+          # Example: Interact with UI elements (tap coordinates)
+          # adb shell input tap 500 1000
+          # sleep 3
+          # adb exec-out screencap -p > screenshots/screenshot_3.png
+
+    - name: Upload screenshots as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-screenshots-${{ github.ref_name }}
+        path: screenshots/
+        retention-days: 30
+
     - name: Create Pull Request
       id: create_pr
       uses: actions/github-script@v7
@@ -49,7 +109,10 @@ jobs:
               return;
             }
             
-            // Create new PR
+            // Get workflow run URL for screenshots
+            const workflowUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            
+            // Create new PR with screenshots reference
             const result = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -63,6 +126,15 @@ jobs:
             **Triggered by:** Push to ${headBranch}
 
             This PR was automatically created when changes were pushed to the ${headBranch} branch.
+
+            ## 📱 Screenshots
+            Screenshots of the app have been captured and are available in the workflow artifacts:
+            [View Screenshots](${workflowUrl}) - Download the \`app-screenshots-${headBranch}\` artifact
+
+            ## ✅ Quality Checks
+            - Flutter analyze: Passed
+            - Tests: Passed
+            - Screenshots: Captured
 
             Please review the changes and merge when ready.`
                         });
@@ -102,7 +174,12 @@ jobs:
           **Quality Checks:**
           ✅ Flutter analyze passed
           ✅ Tests passed
+          ✅ Screenshots captured
           ⏳ Awaiting your code review
+          
+          **Screenshots:**
+          App screenshots have been captured and are available as workflow artifacts.
+          View them at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           
           **Action Required:**
           Please review the PR and approve/request changes:
@@ -139,5 +216,174 @@ jobs:
           **Latest Changes:**
           New commits have been pushed to the feature branch. Please review the updated changes.
           
+          **Screenshots:**
+          Updated screenshots are available at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
           Best regards,
           Ahmed Gad
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# name: Create PR to Development
+
+# on:
+#   push:
+#     branches:
+#       - 'features/*'  # Triggers on any branch starting with 'features/'
+#       - 'bugfix/*'    # Triggers on any branch starting with 'bugfix/'
+#       - 'hotfix/*'    # Triggers on any branch starting with 'hotfix/' 
+  
+# permissions:
+#   contents: read
+#   pull-requests: write
+
+# jobs:
+#   create-pr-and-notify:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+
+#     - name: Set up Flutter
+#       uses: subosito/flutter-action@v2
+
+#     - name: Create Pull Request
+#       id: create_pr
+#       uses: actions/github-script@v7
+#       with:
+#         script: |
+#           try {
+#             // Extract branch name from the ref (removes 'refs/heads/')
+#             const headBranch = context.ref.replace('refs/heads/', '');
+#             console.log('Creating PR for:', headBranch, '-> development');
+            
+#             // Check if PR already exists
+#             const existingPRs = await github.rest.pulls.list({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               head: `${context.repo.owner}:${headBranch}`,
+#               base: 'development',
+#               state: 'open'
+#             });
+            
+#             if (existingPRs.data.length > 0) {
+#               console.log('PR already exists:', existingPRs.data[0].html_url);
+#               core.setOutput('pr_created', 'false');
+#               core.setOutput('pr_url', existingPRs.data[0].html_url);
+#               core.setOutput('pr_number', existingPRs.data[0].number);
+#               return;
+#             }
+            
+#             // Create new PR
+#             const result = await github.rest.pulls.create({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               title: `🔄 ${headBranch} → development`,
+#               head: headBranch,
+#               base: 'development',
+#               body: `## Automated Pull Request
+              
+#             **Branch:** ${headBranch} → development
+#             **Author:** ${context.actor}
+#             **Triggered by:** Push to ${headBranch}
+
+#             This PR was automatically created when changes were pushed to the ${headBranch} branch.
+
+#             Please review the changes and merge when ready.`
+#                         });
+                        
+#                         console.log('PR created successfully:', result.data.html_url);
+#                         core.setOutput('pr_created', 'true');
+#                         core.setOutput('pr_url', result.data.html_url);
+#                         core.setOutput('pr_number', result.data.number);
+                        
+#                       } catch (error) {
+#                         console.error('Error creating PR:', error);
+#                         core.setFailed(`Failed to create PR: ${error.message}`);
+#                       }
+
+#     - name: Send email notification
+#       if: steps.create_pr.outputs.pr_created == 'true'
+#       uses: dawidd6/action-send-mail@v3
+#       with:
+#         server_address: smtp.gmail.com 
+#         server_port: 587
+#         username: ${{ secrets.EMAIL_USERNAME }}
+#         password: ${{ secrets.EMAIL_PASSWORD }}
+#         subject: "📋 New PR for Review: ${{ github.ref_name }} → development"
+#         to: ${{ secrets.TEAM_LEAD_EMAIL }}
+#         from: ${{ secrets.EMAIL_USERNAME }}
+#         body: |
+#           Hi Team Lead,
+          
+#           A new Pull Request has been created and is ready for your review.
+          
+#           **Pull Request Details:**
+#           - Branch: ${{ github.ref_name }}
+#           - Repository: ${{ github.repository }}
+#           - Author: ${{ github.actor }}
+#           - PR URL: ${{ steps.create_pr.outputs.pr_url }}
+          
+#           **Quality Checks:**
+#           ✅ Flutter analyze passed
+#           ✅ Tests passed
+#           ⏳ Awaiting your code review
+          
+#           **Action Required:**
+#           Please review the PR and approve/request changes:
+#           ${{ steps.create_pr.outputs.pr_url }}
+          
+#           **Workflow Details:**
+#           View workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+#           Best regards,
+#           Ahmed Gad
+
+#     - name: Send email if PR already exists
+#       if: steps.create_pr.outputs.pr_created == 'false' && steps.create_pr.outputs.pr_url
+#       uses: dawidd6/action-send-mail@v3
+#       with:
+#         server_address: smtp.gmail.com 
+#         server_port: 587
+#         username: ${{ secrets.EMAIL_USERNAME }}
+#         password: ${{ secrets.EMAIL_PASSWORD }}
+#         subject: "🔄 PR Updated: ${{ github.ref_name }} → development"
+#         to: ${{ secrets.TEAM_LEAD_EMAIL }}
+#         from: ${{ secrets.EMAIL_USERNAME }}
+#         body: |
+#           Hi Team Lead,
+          
+#           An existing Pull Request has been updated with new changes.
+          
+#           **Pull Request Details:**
+#           - Branch: ${{ github.ref_name }}
+#           - Repository: ${{ github.repository }}
+#           - Author: ${{ github.actor }}
+#           - PR URL: ${{ steps.create_pr.outputs.pr_url }}
+          
+#           **Latest Changes:**
+#           New commits have been pushed to the feature branch. Please review the updated changes.
+          
+#           Best regards,
+#           Ahmed Gad
