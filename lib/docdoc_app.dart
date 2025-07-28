@@ -3,13 +3,13 @@ import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/configurations/themes/dark_theme.dart';
 import 'package:docdoc/core/configurations/themes/light_theme.dart';
 import 'package:docdoc/flavors.dart';
+import 'package:docdoc/shared/utils/constants.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DocDocApp extends StatelessWidget {
-  final String? token;
-  const DocDocApp({super.key, this.token});
+  const DocDocApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class DocDocApp extends StatelessWidget {
         theme: lightTheme(),
         darkTheme: darkTheme(),
         themeMode: ThemeMode.light,
-        initialRoute: token != null ? Routes.layout : Routes.login,
+        initialRoute: isLoggedInUser ? Routes.layout : Routes.login,
         onGenerateRoute: DocDocRouter.generateRoute,
       ),
     );

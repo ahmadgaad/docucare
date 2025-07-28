@@ -1,52 +1,47 @@
 import 'package:dio/dio.dart';
-import 'package:docdoc/core/helpers/shared_pref.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DioFactory {
-  /// private constructor as I don't want to allow creating an instance of this class
-  DioFactory._();
+  final DioConfig _config;
+  final List<Interceptor> _interceptors;
 
-  static Dio? dio;
-  static String token = '';
+  DioFactory({
+    required DioConfig config,
+    required List<Interceptor> interceptors,
+  }) : _config = config,
+       _interceptors = interceptors;
 
-  static Dio getDio() {
-    Duration timeOut = const Duration(seconds: 30);
-
-    if (dio == null) {
-      dio = Dio();
-      dio!
-        ..options.connectTimeout = timeOut
-        ..options.receiveTimeout = timeOut;
-      _addDioHeaders();
-      _addDioInterceptor();
-      return dio!;
-    } else {
-      return dio!;
-    }
-  }
-
-  static void _addDioInterceptor() async {
-    dio?.interceptors.add(
-      PrettyDioLogger(
-        requestBody: true,
-        requestHeader: true,
-        responseHeader: true,
+  Dio create() {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: _config.connectTimeout,
+        receiveTimeout: _config.receiveTimeout,
+        headers: _config.defaultHeaders,
       ),
     );
-  }
 
-  static Future<void> _addDioHeaders() async {
-    await getToken();
-    dio?.options.headers.addAll({
+    // Add all interceptors
+    for (final interceptor in _interceptors) {
+      dio.interceptors.add(interceptor);
+    }
+
+    return dio;
+  }
+}
+
+class DioConfig {
+  static const Duration _defaultTimeout = Duration(seconds: 30);
+
+  final Duration connectTimeout;
+  final Duration receiveTimeout;
+  final Map<String, dynamic> defaultHeaders;
+
+  const DioConfig({
+    this.connectTimeout = _defaultTimeout,
+    this.receiveTimeout = _defaultTimeout,
+    this.defaultHeaders = const {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Accept-Language': 'en',
-      "Authorization": 'Bearer $token',
-    });
-  }
-
-  static Future<void> getToken() async {
-    final prefs = SharedPrefService();
-    token = await prefs.getSecureString('token') ?? '';
-  }
+    },
+  });
 }
