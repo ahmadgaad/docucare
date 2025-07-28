@@ -1,11 +1,15 @@
+import 'package:docdoc/core/configurations/routing/routes.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
+import 'package:docdoc/core/extensions/navigation.dart';
+import 'package:docdoc/features/authentication/data/models/login_request_body.dart';
 import 'package:docdoc/features/authentication/presentation/components/already_have_an_account.dart';
 import 'package:docdoc/features/authentication/presentation/components/login_agreement_text.dart';
 import 'package:docdoc/features/authentication/presentation/components/login_form.dart';
-import 'package:docdoc/features/authentication/presentation/components/login_social_buttons.dart';
-import 'package:docdoc/features/authentication/presentation/components/login_social_divider.dart';
 import 'package:docdoc/features/authentication/presentation/components/welcome_texts.dart';
+import 'package:docdoc/features/authentication/presentation/controller/auth_controller.dart';
+import 'package:docdoc/features/authentication/presentation/controller/auth_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -60,20 +64,67 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 32.verticalSpace,
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {}
+                BlocConsumer<AuthController, AuthStates>(
+                  listenWhen: (previous, current) =>
+                      current is Loading ||
+                      current is Success ||
+                      current is Error,
+                  listener: (context, state) {
+                    state.whenOrNull(
+                      loading: () => showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      ),
+                      success: (data) {
+                        context.pushNamed(Routes.layout);
+                      },
+                      error: (message) {
+                        Navigator.of(context).pop(); // Close the loading dialog
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(message),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                    );
                   },
-                  child: Text('Login', style: TextStyles.font16WhiteSemiBold),
+                  builder: (context, state) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          context.read<AuthController>().login(
+                            LoginRequestBody(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(
+                        'Login',
+                        style: TextStyles.font16WhiteSemiBold,
+                      ),
+                    );
+                  },
                 ),
                 46.verticalSpace,
-                LoginSocialDivider(),
-                32.verticalSpace,
-                LoginSocialButtons(),
-                32.verticalSpace,
-                LoginAgreementText(),
+                // LoginSocialDivider(),
+                // 32.verticalSpace,
+                // LoginSocialButtons(),
+                // 32.verticalSpace,
+                LoginAgreementText(isLogin: true),
                 24.verticalSpace,
-                AlreadyHaveAnAccount(),
+                AlreadyHaveAnAccount(isLogin: true),
               ],
             ),
           ),

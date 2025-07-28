@@ -19,9 +19,9 @@ class FlavorConfig {
   static String get baseUrl {
     switch (appFlavor) {
       case Flavor.development:
-        return 'https://dev-api.docdoc.com';
+        return 'https://vcare.integration25.com/api';
       case Flavor.production:
-        return 'https://api.docdoc.com';
+        return 'https://vcare.integration25.com/api';
       default:
         return '';
     }
