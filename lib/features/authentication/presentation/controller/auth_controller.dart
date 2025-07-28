@@ -1,11 +1,11 @@
-import 'dart:developer';
-
+import 'package:docdoc/core/di/dependency_injection.dart';
 import 'package:docdoc/core/helpers/shared_pref.dart';
 import 'package:docdoc/core/networking/api_result.dart';
 import 'package:docdoc/features/authentication/data/models/login_request_body.dart';
 import 'package:docdoc/features/authentication/data/models/register_request_body.dart';
 import 'package:docdoc/features/authentication/data/repositories/auth_repository.dart';
 import 'package:docdoc/features/authentication/presentation/controller/auth_states.dart';
+import 'package:docdoc/shared/utils/constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthController extends Cubit<AuthStates> {
@@ -17,12 +17,16 @@ class AuthController extends Cubit<AuthStates> {
     final result = await _loginRepos.login(body);
 
     result.when(
-      success: (data) async {
-        final prefs = SharedPrefService();
-        await prefs.setString(key: 'name', value: data.user.user);
-        await prefs.setSecureString(key: 'token', value: data.user.token);
-        log(data.user.token, name: 'Login successful');
-        emit(AuthStates.success(data));
+      success: (loginResponse) async {
+        sl<SharedPrefService>().setData(
+          key: SharedPrefKeys.userName,
+          value: loginResponse.user.user,
+        );
+        await sl<SharedPrefService>().setSecureString(
+          key: SharedPrefKeys.userToken,
+          value: loginResponse.user.token,
+        );
+        emit(AuthStates.success(loginResponse));
       },
       failure: (error) {
         emit(AuthStates.error(error.apiErrorModel.message ?? ''));
