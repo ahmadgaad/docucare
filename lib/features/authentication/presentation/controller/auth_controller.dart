@@ -29,7 +29,7 @@ class AuthController extends Cubit<AuthStates> {
         emit(AuthStates.success(loginResponse));
       },
       failure: (error) {
-        emit(AuthStates.error(error.apiErrorModel.message ?? ''));
+        emit(AuthStates.error(error.getAllErrorMessages()));
       },
     );
   }
@@ -43,7 +43,7 @@ class AuthController extends Cubit<AuthStates> {
       },
       failure: (error) {
         emit(
-          AuthStates.registerError(error: error.apiErrorModel.message ?? ""),
+          AuthStates.registerError(error: error.getAllErrorMessages()),
         );
       },
     );

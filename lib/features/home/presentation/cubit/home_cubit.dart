@@ -1,4 +1,4 @@
-import 'package:docdoc/core/extensions/string.dart';
+import 'package:docdoc/core/extensions/nullable_checks.dart';
 import 'package:docdoc/core/networking/api_result.dart';
 import 'package:docdoc/features/home/data/models/specializations_response.dart';
 import 'package:docdoc/features/home/data/repositories/home_repository.dart';
@@ -24,9 +24,7 @@ class HomeCubit extends Cubit<HomeStates> {
         emit(HomeStates.specializationSuccess(specializations));
       },
       failure: (error) => emit(
-        HomeStates.specializationError(
-          error: error.apiErrorModel.message ?? '',
-        ),
+        HomeStates.specializationError(error: error.getAllErrorMessages()),
       ),
     );
   }

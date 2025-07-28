@@ -1,5 +1,5 @@
 import 'package:docdoc/core/di/dependency_injection.dart';
-import 'package:docdoc/core/extensions/string.dart';
+import 'package:docdoc/core/extensions/nullable_checks.dart';
 import 'package:docdoc/core/helpers/shared_pref.dart';
 import 'package:docdoc/core/observers/bloc_observer.dart';
 import 'package:docdoc/docdoc_app.dart';
