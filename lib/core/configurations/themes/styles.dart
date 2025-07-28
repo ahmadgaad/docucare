@@ -48,6 +48,13 @@ class TextStyles {
     fontWeight: FontWeightHelper.regular,
   );
 
+
+  static TextStyle font14DarkBlueSemiBold = GoogleFonts.inter(
+    fontSize: 14.sp,
+    color: ColorUtils.darkBlue,
+    fontWeight: FontWeightHelper.semiBold,
+  );
+
   static TextStyle font13BlueRegular = TextStyle(
     fontSize: 13.sp,
     color: ColorUtils.primary,

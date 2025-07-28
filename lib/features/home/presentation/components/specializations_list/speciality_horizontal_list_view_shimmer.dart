@@ -1,16 +1,16 @@
-import 'package:docdoc/features/home/presentation/components/doctor_speciality_see_all_button.dart';
+import 'package:docdoc/features/home/presentation/components/speciality_see_all_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
-class DoctorSpecialityListViewShimmer extends StatelessWidget {
-  const DoctorSpecialityListViewShimmer({super.key});
+class SpecialityListViewShimmer extends StatelessWidget {
+  const SpecialityListViewShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DoctorSpecialitySeeAll(title: 'Doctor Speciality'),
+        SpecialitySeeAll(title: 'Doctor Speciality'),
         16.verticalSpace,
         SizedBox(
           height: 120.h,

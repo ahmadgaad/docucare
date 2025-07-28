@@ -14,7 +14,7 @@ class AuthorizationInterceptors extends Interceptor {
       SharedPrefKeys.userToken,
     );
 
-    if (!token.isNullOrEmpty()) {
+    if (token.isNotNullOrEmpty()) {
       options.headers['Authorization'] = 'Bearer $token';
     }
     super.onRequest(options, handler);

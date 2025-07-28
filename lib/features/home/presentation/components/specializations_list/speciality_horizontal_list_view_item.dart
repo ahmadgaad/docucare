@@ -1,21 +1,19 @@
 import 'package:docdoc/core/configurations/themes/colors.dart';
 import 'package:docdoc/core/configurations/themes/styles.dart';
 import 'package:docdoc/features/home/data/models/specializations_response.dart';
-import 'package:docdoc/features/home/presentation/cubit/home_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class DoctorSpecialityHorizontalListViewItem extends StatelessWidget {
-  const DoctorSpecialityHorizontalListViewItem({
+class SpecialityHorizontalListViewItem extends StatelessWidget {
+  const SpecialityHorizontalListViewItem({
     super.key,
     required this.specialization,
-    required this.index,
-    required this.isSelected,
+    required this.itemIndex,
+    required this.selectedIndex,
   });
 
-  final int index;
-  final bool isSelected;
+  final int itemIndex;
+  final int selectedIndex;
   final SpecializationsData specialization;
 
   @override
@@ -26,21 +24,21 @@ class DoctorSpecialityHorizontalListViewItem extends StatelessWidget {
           width: 70.w,
           height: 70.h,
           decoration: BoxDecoration(
-            color: isSelected
+            color: itemIndex == selectedIndex
                 ? ColorUtils.primary.withValues(alpha: 0.2)
                 : const Color.fromARGB(255, 239, 239, 251),
             shape: BoxShape.circle,
-            border: isSelected
+            border: itemIndex == selectedIndex
                 ? Border.all(color: ColorUtils.primary, width: 2)
                 : null,
           ),
           child: IconButton(
-            onPressed: () {
-              context.read<HomeCubit>().selectSpecialization(index);
-            },
+            onPressed: null,
             icon: Icon(
               Icons.medical_services,
-              color: isSelected ? ColorUtils.primary : ColorUtils.grey,
+              color: itemIndex == selectedIndex
+                  ? ColorUtils.primary
+                  : ColorUtils.grey,
             ),
           ),
         ),
@@ -49,7 +47,9 @@ class DoctorSpecialityHorizontalListViewItem extends StatelessWidget {
           width: 70.w,
           child: Text(
             specialization.name,
-            style: TextStyles.font14DarkBlueRegular,
+            style: itemIndex == selectedIndex
+                ? TextStyles.font14DarkBlueSemiBold
+                : TextStyles.font14DarkBlueRegular,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

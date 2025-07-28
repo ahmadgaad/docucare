@@ -1,5 +1,5 @@
 import 'package:docdoc/features/home/data/models/specializations_response.dart';
-import 'package:docdoc/features/home/presentation/components/doctors_vertical_list_view_item.dart';
+import 'package:docdoc/features/home/presentation/components/doctors_list/doctors_vertical_list_view_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

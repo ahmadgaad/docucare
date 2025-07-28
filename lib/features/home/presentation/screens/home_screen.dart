@@ -1,8 +1,9 @@
 import 'package:docdoc/core/di/dependency_injection.dart';
 import 'package:docdoc/core/helpers/shared_pref.dart';
+import 'package:docdoc/features/home/presentation/components/doctors_list/doctors_bloc_builder.dart';
 import 'package:docdoc/features/home/presentation/components/home_top_bar.dart';
 import 'package:docdoc/features/home/presentation/components/nearby_doctor_card.dart';
-import 'package:docdoc/features/home/presentation/components/specializations_and_doctors_bloc_builder.dart';
+import 'package:docdoc/features/home/presentation/components/specializations_bloc_builder.dart';
 import 'package:docdoc/features/home/presentation/cubit/home_cubit.dart';
 import 'package:docdoc/shared/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   34.verticalSpace,
                   NearbyDoctorCard(),
                   24.verticalSpace,
-                  SpecializationsAndDoctorsBlocBuilder(),
+                  SpecializationsBlocBuilder(),
+                  DoctorsBlocBuilder(),
                 ],
               ),
             ),

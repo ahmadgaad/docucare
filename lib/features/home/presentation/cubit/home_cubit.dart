@@ -1,3 +1,4 @@
+import 'package:docdoc/core/extensions/string.dart';
 import 'package:docdoc/core/networking/api_result.dart';
 import 'package:docdoc/features/home/data/models/specializations_response.dart';
 import 'package:docdoc/features/home/data/repositories/home_repository.dart';
@@ -10,13 +11,7 @@ class HomeCubit extends Cubit<HomeStates> {
     loadSpecializations();
   }
 
-  int? selectedSpecializationIndex;
   List<SpecializationsData> allSpecializations = [];
-
-  void selectSpecialization(int index) {
-    selectedSpecializationIndex = index;
-    emit(HomeStates.specializationSelected(index));
-  }
 
   Future<void> loadSpecializations() async {
     emit(HomeStates.specializationLoading());
@@ -25,7 +20,7 @@ class HomeCubit extends Cubit<HomeStates> {
     response.when(
       success: (specializations) {
         allSpecializations = specializations.specializationsDataList;
-        selectedSpecializationIndex = 0; // Default to first specialization
+        getDoctorsList(specializationId: allSpecializations.first.id);
         emit(HomeStates.specializationSuccess(specializations));
       },
       failure: (error) => emit(
@@ -34,5 +29,27 @@ class HomeCubit extends Cubit<HomeStates> {
         ),
       ),
     );
+  }
+
+  void getDoctorsList({required int specializationId}) {
+    List<DoctorModel> doctorsList = getDoctorsListBySpecializationId(
+      specializationId,
+    );
+
+    if (doctorsList.isNotNullOrEmpty()) {
+      emit(HomeStates.doctorsSuccess(doctorsList));
+    } else {
+      emit(
+        HomeStates.doctorsError(
+          error: 'No doctors found for this specialization.',
+        ),
+      );
+    }
+  }
+
+  List<DoctorModel> getDoctorsListBySpecializationId(int specializationId) {
+    return allSpecializations
+        .firstWhere((specialization) => specialization.id == specializationId)
+        .doctors;
   }
 }
